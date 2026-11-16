@@ -1,10 +1,17 @@
 # Johans Kochbox
 
-Wochen-Kochbox als einzelne HTML-Seite: vier Gerichte für 3 Personen (ohne Pilze) – Hähnchen, vegetarisch, Rind und eine Überraschung – jeweils mit Zutaten und Zubereitung.
+Zwei einzelne HTML-Seiten, ohne Installation oder Build. Nur die Schriften kommen von Google Fonts.
+
+| Datei | Was |
+|---|---|
+| `index.html` | Rezeptseite: vier Gerichte für 3 Personen (ohne Pilze) mit Zutaten und Zubereitung |
+| `wochenplan/index.html` | Wochenplan-App: Gerichte per Ziehen auf die Woche verteilen, Einkaufsliste für REWE, Einkaufen Schritt für Schritt mit gemerkten Produkten, Rezepte aus PDF hinzufügen |
 
 ## Öffnen
 
-`index.html` im Browser öffnen. Es wird nichts installiert oder gebaut; nur die Schriften kommen von Google Fonts.
+Die Datei im Browser öffnen.
+
+Der Wochenplan ist als Claude-Artifact gebaut. Außerhalb von Claude speichert er alles nur im Browser (localStorage). Die geteilte Datenbank, PDF-Ablage und das Auslesen von Rezepten mit Claude funktionieren nur in der Artifact-Version.
 
 ## Gerichte
 
