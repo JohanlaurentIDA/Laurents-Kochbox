@@ -327,6 +327,81 @@
   .ghost{position:fixed;left:0;top:0;pointer-events:none;z-index:50;width:200px;
     box-shadow:0 18px 30px -12px rgba(0,0,0,.35);rotate:-3deg;opacity:.95}
   body.is-dragging,body.is-dragging *{cursor:grabbing!important}
+
+  /* ---------- Rezepte in der Mitte, Kalender schmal rechts ---------- */
+  .wrap{max-width:1320px}
+  .layout{grid-template-columns:minmax(0,1fr) 320px;gap:36px}
+  .pantry{position:static;background:none;padding:0;gap:16px;border:1.5px dashed transparent;border-radius:12px}
+  .pantry.over{padding:10px}
+  .pantry-head{align-items:center;gap:12px;flex-wrap:wrap}
+  .pantry-head h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:700}
+  .pantry-head .add-recipe{border-radius:8px;padding:10px 16px;background:var(--ink);color:var(--surface);border:none}
+  .pantry-head .add-recipe:hover{opacity:.88}
+  .pantry .sub-head{display:flex;align-items:baseline;gap:10px;border-top:none;padding:0;margin:14px 0 0;
+    font:600 .95rem var(--f-body);letter-spacing:0;text-transform:none;color:var(--ink)}
+  .pantry .sub-head small{font:400 .85rem var(--f-body);color:var(--ink-soft);padding-left:10px;border-left:1px solid var(--line)}
+  .pantry .dish-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px}
+  .pantry .dish{border-radius:10px;overflow:hidden;box-shadow:0 1px 2px rgba(42,39,33,.06),0 10px 24px -14px rgba(42,39,33,.35)}
+  .pantry .dish:hover{transform:translateY(-3px)}
+  .pantry .dish:not(.custom) .pic,.pantry .dish.recipe .pic{aspect-ratio:16/10}
+  .pantry .dish:not(.custom) .txt{padding:14px 16px 16px;gap:8px;flex:1}
+  .pantry .dish:not(.custom) h3{font-family:var(--f-body);font-weight:700;font-size:1.08rem;line-height:1.25}
+  .pantry .dish .meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.8rem;color:var(--ink-soft);margin-top:auto;padding-top:4px}
+  .pantry .dish .meta span{display:inline-flex;align-items:center;gap:5px}
+  .pantry .dish .meta svg{width:14px;height:14px;flex:none}
+  .pantry .dish .tags{display:flex;flex-wrap:wrap;gap:6px}
+  .pantry .dish .tags span{font-size:.74rem;padding:3px 8px;border-radius:4px;background:var(--tint);color:var(--ink)}
+  .pantry .dish:not(.custom) .kind{display:none}
+  .pantry .uses{top:10px;left:10px;border-radius:100px;padding:3px 10px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+  .pantry .pdf-link{top:10px;right:10px;border-radius:100px;padding:3px 9px}
+  .pantry .dish.recipe .remove{border-radius:100px}
+  .pantry .dish.recipe .txt{padding-right:40px}
+  .pantry #customList{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+  .pantry .dish.custom{border-radius:8px}
+  .pantry .add{max-width:520px}
+  .pantry .add input,.pantry .add button{border-radius:6px}
+
+  .cal{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);max-height:calc(100vh - 32px);overflow-y:auto;
+    background:var(--bg-deep);border-radius:12px;padding:14px 12px 12px;scrollbar-width:thin}
+  .cal .cal-head{margin-bottom:10px;padding:0 2px}
+  .cal .cal-head h2{font-size:1rem}
+  .cal .cal-head span{font-size:.7rem}
+  .cal .grid{gap:6px}
+  .cal .row.head{display:none}
+  .cal .row{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:7px;background:color-mix(in srgb,var(--surface) 55%,transparent);border-radius:8px}
+  .cal .daycell{grid-column:1/-1;flex-direction:row;align-items:baseline;gap:8px;padding:0 2px 2px}
+  .cal .daycell b{font-size:.92rem}
+  .cal .daycell span{font-size:.66rem}
+  .cal .eddy-col{margin-left:0;padding:0;background:none}
+  .cal .eddy-col::before{display:none}
+  .cal .slot{min-height:42px;font-size:.68rem;border-width:1px;border-radius:6px;padding:4px}
+  .cal .slot:not(.filled){flex-direction:column;gap:0}
+  .cal .slot .mlabel{display:block;font-family:var(--f-mono);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase}
+  .cal .slot .dish{border-radius:6px;overflow:hidden}
+  .cal .slot .dish .pic{width:36px}
+  .cal .slot .dish .pic .initial{font-size:1rem}
+  .cal .slot .dish .txt{padding:5px 22px 5px 6px}
+  .cal .slot .dish .kind{display:none}
+  .cal .slot .dish h3{font-size:.72rem;-webkit-line-clamp:2}
+  .cal .remove{width:18px;height:18px;font-size:11px;top:2px;right:2px}
+  .cal .hint{margin-top:12px;font-size:.64rem;flex-direction:column;gap:4px;line-height:1.4;padding:0 2px}
+  @media (max-width:900px){
+    .layout{grid-template-columns:1fr}
+    .cal{position:static;max-height:none}
+    .pantry .dish-list{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+  }
+  @media (max-width:480px){
+    .pantry .dish-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .pantry #customList{grid-template-columns:1fr}
+    .pantry .sub-head{flex-wrap:wrap;gap:2px 10px}
+    .pantry .sub-head small{border-left:none;padding-left:0;flex-basis:100%;font-size:.78rem}
+    .pantry .dish:not(.custom) .txt{padding:9px 10px 11px;gap:6px}
+    .pantry .dish:not(.custom) h3{font-size:.88rem}
+    .pantry .dish .tags span{font-size:.66rem;padding:2px 6px}
+    .pantry .dish .meta{font-size:.7rem;gap:2px 10px}
+    .pantry .uses{top:6px;left:6px;font-size:.6rem;padding:2px 7px}
+    .pantry .dish.recipe .txt{padding-right:34px}
+  }
   @media (prefers-reduced-motion:reduce){ .dish,.slot{transition:none} .ghost{rotate:0deg} }
 </style>
 
@@ -335,7 +410,7 @@
     <div>
       <p class="eyebrow">Johans Kochbox · 3 Personen · ohne Pilze</p>
       <h1>Wochenplan</h1>
-      <p class="sub">Gerichte links greifen und auf eine Mahlzeit der nächsten Woche ziehen.</p>
+      <p class="sub">Rezept greifen und auf eine Mahlzeit im Kalender ziehen.</p>
     </div>
     <div class="status">
       <div class="tally"><span><strong id="countFam">0</strong> Mahlzeiten Familie</span><span><strong id="countEddy">0</strong> × Eddy allein</span></div>
@@ -538,22 +613,21 @@
   </aside>
 
   <div class="layout">
-    <aside class="pantry" id="pantry" aria-label="Gerichte">
-      <div class="pantry-head"><h2>Gerichte</h2><span>Kochbox</span></div>
+    <section class="pantry" id="pantry" aria-label="Rezepte">
+      <div class="pantry-head"><h2>Rezepte</h2><button class="add-recipe" id="addRecipeBtn" type="button">+ Rezept hinzufügen</button></div>
+      <p class="sub-head">Kochbox <small id="countDishes"></small></p>
       <div class="dish-list" id="dishList"></div>
-      <p class="sub-head">Neue Rezepte</p>
+      <p class="sub-head" id="recipeHead">Neue Rezepte <small id="countRecipes"></small></p>
       <div class="dish-list" id="recipeList"></div>
-      <button class="add-recipe" id="addRecipeBtn" type="button">+ Rezept hinzufügen (PDF, HelloFresh, REWE, Instagram …)</button>
-      <p class="sub-head">Eigene Gerichte</p>
+      <p class="sub-head">Eigene Gerichte <small>Frühstück, Reste und alles ohne Rezept</small></p>
       <div class="dish-list" id="customList"></div>
       <form class="add" id="addForm">
         <input id="addInput" type="text" placeholder="z. B. Müsli, Brote, Reste" maxlength="60" aria-label="Eigenes Gericht">
         <button type="submit">+</button>
       </form>
-      <p class="add-hint">Für Frühstück und alles, was nicht aus der Box kommt.</p>
-    </aside>
+    </section>
 
-    <section aria-label="Kalender nächste Woche">
+    <aside class="cal" aria-label="Kalender nächste Woche">
       <div class="cal-head"><h2>Nächste Woche</h2><span id="range"></span></div>
       <div class="grid" id="grid"></div>
       <div class="hint">
@@ -561,9 +635,9 @@
         <span>Karte antippen: Rezept groß lesen</span>
         <span>Ohne Ziehen: im Rezept „Einplanen“, dann Feld antippen</span>
         <span>Ein Gericht kann mehrfach eingeplant werden (z. B. Reste für Eddy)</span>
-        <span>Zurück in die Liste ziehen entfernt es aus dem Plan</span>
+        <span>Zurück zu den Rezepten ziehen entfernt es aus dem Plan</span>
       </div>
-    </section>
+    </aside>
   </div>
 </div>
 
@@ -651,6 +725,7 @@
   const recipeDish = r => { const kind = KIND_CLS[r.kind] ? r.kind : 'Sonstiges';
     return { id:'r-'+r.id, docId:r.id, title:String(r.title||'Rezept'), kind, cls:KIND_CLS[kind], recipe:true,
       img: (typeof r.thumb==='string' && SAFE_IMG.test(r.thumb)) ? `<img src="${r.thumb}" alt="">` : '', ing:recipeIng(r),
+      time: String(r.time||'').slice(0,20), src: /^https:\/\//i.test(String(r.source||'')) ? platformOf(String(r.source)) : (r.pdfId ? 'PDF' : ''),
       pdf: (typeof r.pdfId==='string' && /^[0-9a-f]{32}$/.test(r.pdfId)) ? '/_blob/'+r.pdfId : '' }; };
   const all = () => DISHES.concat(recipes.map(recipeDish), custom.map(c=>{ const ing = recipeIng(c); return {id:c.id, title:String(c.title||''), cls:'stone', kind:'Eigenes', custom:true, ing, hasIng: ing.length>0}; }));
   const find = id => all().find(d=>d.id===id);
@@ -660,6 +735,8 @@
   const pantry = document.getElementById('pantry'), grid = document.getElementById('grid');
   let sel = null; // {id, from}
 
+  const ICON_TIME = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 4.6V8l2.4 1.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  const ICON_LIST = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 4.5h8M5.5 8h8M5.5 11.5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="2.6" cy="4.5" r="1" fill="currentColor"/><circle cx="2.6" cy="8" r="1" fill="currentColor"/><circle cx="2.6" cy="11.5" r="1" fill="currentColor"/></svg>';
   function card(d, from){
     const el = document.createElement('article');
     el.className = 'dish ' + d.cls + (d.custom?' custom':'') + (d.recipe?' recipe':'') + (sel && sel.id===d.id && sel.from===from ? ' selected':'');
@@ -668,7 +745,18 @@
     const pic = d.img || `<span class="initial">${esc(d.title.trim().charAt(0).toUpperCase())}</span>`;
     const n = from ? 0 : uses(d.id);
     const badge = n ? `<span class="uses">${n}× im Plan</span>` : '';
-    el.innerHTML = `<div class="pic">${pic}</div><div class="txt">${d.custom && !from ? '' : `<span class="kind">${d.kind}</span>`}<h3>${esc(d.title)}</h3>${d.custom?badge:''}</div>${d.custom?'':badge}`;
+    let extra = '';
+    if (!from && !d.custom){
+      let time = d.time || '', nIng = (d.ing || []).length, level = '';
+      try { const x = DETAILS[d.id]; if (x){ time = time || x.time; level = x.level || ''; } } catch(e){}
+      try { if (!nIng && ING[d.id]) nIng = ING[d.id].length; } catch(e){}
+      const meta = [];
+      if (time) meta.push(`<span>${ICON_TIME}${esc(String(time))}</span>`);
+      if (nIng) meta.push(`<span>${ICON_LIST}${nIng} Zutaten</span>`);
+      const tags = [d.kind, level, d.recipe && d.src ? d.src : ''].filter(Boolean);
+      extra = `<div class="tags">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>${meta.length ? `<div class="meta">${meta.join('')}</div>` : ''}`;
+    }
+    el.innerHTML = `<div class="pic">${pic}</div><div class="txt">${d.custom && !from ? '' : `<span class="kind">${d.kind}</span>`}<h3>${esc(d.title)}</h3>${extra}${d.custom?badge:''}</div>${d.custom?'':badge}`;
     if (d.recipe && !from && d.pdf){
       const a = document.createElement('a'); a.className='pdf-link'; a.href=d.pdf; a.target='_blank'; a.rel='noopener'; a.textContent='PDF ↗';
       a.addEventListener('pointerdown', e=>e.stopPropagation()); a.addEventListener('click', e=>e.stopPropagation());
@@ -712,6 +800,9 @@
     const rl = document.getElementById('recipeList'); rl.innerHTML = '';
     recipes.map(recipeDish).forEach(d => rl.appendChild(card(d,null)));
     all().filter(d=>d.custom).forEach(d => cl.appendChild(card(d,null)));
+    const nr = recipes.length;
+    document.getElementById('countDishes').textContent = DISHES.length + ' Gerichte';
+    document.getElementById('countRecipes').textContent = nr ? nr + (nr===1 ? ' Rezept' : ' Rezepte') : 'noch keine, oben auf „+ Rezept hinzufügen“ tippen';
 
     grid.innerHTML = '';
     const head = document.createElement('div'); head.className='row head';
