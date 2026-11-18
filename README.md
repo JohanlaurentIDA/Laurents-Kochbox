@@ -5,7 +5,7 @@ Zwei einzelne HTML-Seiten, ohne Installation oder Build. Nur die Schriften komme
 | Datei | Was |
 |---|---|
 | `index.html` | Rezeptseite: vier Gerichte für 3 Personen (ohne Pilze) mit Zutaten und Zubereitung |
-| `wochenplan/index.html` | Wochenplan-App: Gerichte per Ziehen auf die Woche verteilen, Einkaufsliste für REWE, Einkaufen Schritt für Schritt mit gemerkten Produkten, Rezepte aus PDF hinzufügen |
+| `wochenplan/index.html` | Wochenplan-App: Gerichte per Ziehen auf die Woche verteilen, Einkaufsliste für REWE, Einkaufen Schritt für Schritt mit gemerkten Produkten, Rezepte aus PDF, Instagram, TikTok und Facebook hinzufügen |
 
 ## Öffnen
 
