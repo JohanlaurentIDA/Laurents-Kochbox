@@ -360,9 +360,10 @@
         <span>oder klicken, um eine Datei auszuwählen</span>
       </label>
       <div class="social" id="social">
-        <p class="social-or"><span>oder aus Instagram, TikTok, Facebook</span></p>
-        <label class="fld">Link zum Beitrag<input id="sUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://www.instagram.com/reel/…"></label>
-        <label class="fld">Beschreibung des Beitrags <small>in der App kopieren und hier einfügen</small><textarea id="sText" rows="4" placeholder="Zutaten: 500 g Nudeln, 1 Zucchini …"></textarea></label>
+        <p class="social-or"><span>oder aus HelloFresh, REWE, Instagram, TikTok …</span></p>
+        <label class="fld">Link zum Rezept <small>„Teilen → Link kopieren“</small><input id="sUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://www.hellofresh.de/recipes/…"></label>
+        <label class="fld">Text des Rezepts <small>Beschreibung oder ganze Webseite kopieren (Strg+A, Strg+C) und einfügen</small><textarea id="sText" rows="4" placeholder="Zutaten: 500 g Nudeln, 1 Zucchini …"></textarea></label>
+        <p class="social-info" id="sHint">HelloFresh: Auf der Rezeptseite gibt es die Rezeptkarte als PDF, die kannst du oben ablegen.</p>
         <div class="social-row">
           <label class="pick" for="sMedia">Screenshots oder Video<input type="file" id="sMedia" accept="image/*,video/*" multiple></label>
           <span class="social-info" id="sMediaInfo">optional, z. B. wenn das Rezept nur im Video steht</span>
@@ -542,7 +543,7 @@
       <div class="dish-list" id="dishList"></div>
       <p class="sub-head">Neue Rezepte</p>
       <div class="dish-list" id="recipeList"></div>
-      <button class="add-recipe" id="addRecipeBtn" type="button">+ Rezept hinzufügen (PDF, Instagram, TikTok …)</button>
+      <button class="add-recipe" id="addRecipeBtn" type="button">+ Rezept hinzufügen (PDF, HelloFresh, REWE, Instagram …)</button>
       <p class="sub-head">Eigene Gerichte</p>
       <div class="dish-list" id="customList"></div>
       <form class="add" id="addForm">
@@ -1340,6 +1341,9 @@ Regeln:
     if (/(^|\.)(facebook\.com|fb\.watch|fb\.com)$/.test(h)) return 'Facebook';
     if (/(^|\.)(youtube\.com|youtu\.be)$/.test(h)) return 'YouTube';
     if (/(^|\.)pinterest\.[a-z.]+$/.test(h) || h === 'pin.it') return 'Pinterest';
+    if (/(^|\.)hellofresh\.[a-z.]+$/.test(h) || /(^|\.)hfrsh\.de$/.test(h)) return 'HelloFresh';
+    if (/(^|\.)rewe\.de$/.test(h)) return 'REWE';
+    if (/(^|\.)chefkoch\.de$/.test(h)) return 'Chefkoch';
     return h.replace(/^www\./,'');
   }
   // Ein Link aus dem Teilen-Menü bringt oft Text mit („Schau dir diesen Beitrag an … https://…“)
@@ -1412,7 +1416,7 @@ Regeln:
 
   async function askSocial(url, text, canvases){
     const where = platformOf(url) || 'Social Media';
-    let prompt = `Du bekommst ein Rezept aus einem ${where}-Beitrag: den Beschreibungstext und/oder Bilder (Screenshots oder Standbilder aus dem Video mit eingeblendetem Text). Lies das Rezept aus und rechne alle Mengen auf 3 Personen um.
+    let prompt = `Du bekommst ein Rezept von ${where} (Beitrag, Rezeptseite oder App): kopierten Text und/oder Bilder (Screenshots oder Standbilder aus dem Video mit eingeblendetem Text). Lies das Rezept aus und rechne alle Mengen auf 3 Personen um.
 Antworte nur mit JSON in genau dieser Form:
 {"found":true,"title":"Kurzer Rezepttitel","kind":"Hähnchen","time":"30 Min","ingredients":[{"amount":600,"unit":"g","name":"Hähnchenschenkel"},{"amount":0,"unit":"","name":"Salz, Pfeffer"}],"steps":["Schritt 1","Schritt 2"],"photoIndex":0,"photo":{"x":0.1,"y":0.2,"w":0.6,"h":0.5},"note":""}
 Regeln:
@@ -1424,7 +1428,10 @@ Regeln:
 - amount ist eine Zahl; 0, wenn keine Menge genannt wird. Fehlen Mengen ganz, schätze übliche Mengen für 3 Personen und schreib das in note.
 - name ist kurz, auf Deutsch und so, wie man die Zutat in einem deutschen Supermarkt sucht.
 - steps: die Zubereitung in kurzen Schritten auf Deutsch, Mengen für 3 Personen.
-- title auf Deutsch, ohne Emojis und Hashtags. Werbung, Hashtags und Aufrufe zum Folgen ignorieren.`;
+- title auf Deutsch, ohne Emojis und Hashtags. Werbung, Hashtags und Aufrufe zum Folgen ignorieren.
+- Kopierte Webseiten enthalten Menüs, Werbung, Bewertungen, Kommentare und Nährwerte: alles ignorieren, nur das Rezept zählt.
+- Kochboxen (HelloFresh, Marley Spoon …): Zutaten aus der Box UND „Aus deiner Vorratskammer“/„Das brauchst du noch“ übernehmen. Gibt es Mengen für 2, 3 oder 4 Personen, nimm die für 3 Personen.
+- Steht eine Personenzahl dabei (z. B. „für 4 Portionen“ bei REWE), rechne von dieser auf 3 um.`;
     const opts = {modelTier: 'default'};
     if (canvases.length){
       opts.images = await Promise.all(canvases.map(c => new Promise(r => c.toBlob(r, 'image/jpeg', .82))));
@@ -1443,18 +1450,18 @@ Regeln:
     const url = cleanUrl(raw) || cleanUrl(text);
     if (raw && !url){ status('Der Link sieht nicht richtig aus. Er muss mit https:// anfangen.', true); $('sUrl').focus(); return; }
     if (!text && !sCanvases.length){
-      status(url ? 'Den Beitrag selbst kann die App nicht öffnen. Kopier bitte die Beschreibung aus der App oder wähl Screenshots bzw. das gespeicherte Video.' : 'Füg die Beschreibung ein oder wähl Screenshots bzw. ein Video.', true);
+      status(url ? 'Die Seite selbst kann die App nicht öffnen. Kopier bitte den Rezepttext (auf Webseiten: Strg+A, Strg+C) oder wähl Screenshots bzw. das gespeicherte Video.' : 'Füg den Rezepttext ein oder wähl Screenshots bzw. ein Video.', true);
       $('sText').focus(); return;
     }
     if (url) $('sUrl').value = url;
     curFile = null; curSource = url; curPages = []; rot = 0; photoBox = null;
     $('rawText').textContent = text || '(Kein Text, nur Bilder.)';
-    $('rawSum').textContent = 'Text aus dem Beitrag';
+    $('rawSum').textContent = 'Eingefügter Text';
     const showForm = ()=>{ recForm.hidden = false; $('recSave').disabled = false; };
     if (!sampleFn){
       curPages = sCanvases.slice(0,1); setThumb('mid'); showForm();
       $('fTitle').value = (text.split('\n').map(s=>s.trim()).find(s=>s.length>3) || '').replace(/#\S+/g,'').trim().slice(0,90);
-      status('Trag die Zutaten für 3 Personen ein. Der Text aus dem Beitrag steht unten.'); $('rawText').parentElement.open = true; return;
+      status('Trag die Zutaten für 3 Personen ein. Der eingefügte Text steht unten.'); $('rawText').parentElement.open = true; return;
     }
     busy = true; $('sGo').disabled = true;
     status(sCanvases.length ? 'Claude liest den Beitrag und die Bilder aus, das dauert etwas …' : 'Claude liest das Rezept aus und rechnet auf 3 Personen um …');
@@ -1706,7 +1713,7 @@ unit ist eins von: g, kg, ml, l, EL, TL, Stk, Bund, Topf, Dose, Pck, Becher, Gla
     $('detNoSteps').textContent = d.custom ? 'Für eigene Gerichte gibt es keine Zubereitung.' : 'Zu diesem Rezept ist keine Zubereitung gespeichert.';
     const pdf = $('detPdf'); pdf.hidden = !info.pdf; if (info.pdf) pdf.href = info.pdf;
     const src = $('detSrc'), srcOk = /^https:\/\/[^\s]+$/i.test(info.source);
-    src.hidden = !srcOk; if (srcOk){ src.href = info.source; src.textContent = (platformOf(info.source) || 'Original') + '-Beitrag ↗'; }
+    src.hidden = !srcOk; if (srcOk){ src.href = info.source; const pf = platformOf(info.source); src.textContent = (pf || 'Original') + (/^(Instagram|TikTok|Facebook|YouTube|Pinterest)$/.test(pf) ? '-Beitrag ↗' : '-Rezept ↗'); }
     $('detEditIng').hidden = !d.custom;
     $('detPlan').textContent = from ? 'Verschieben' : 'Einplanen';
     $('detRemove').hidden = !from;
