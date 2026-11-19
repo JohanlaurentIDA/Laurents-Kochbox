@@ -398,6 +398,26 @@
   .statusbar .tally .ico{width:20px;height:20px}
   .statusbar .tally strong{font:600 20px/1.4 var(--f-body);color:var(--ink)}
 
+  /* Titel + Statuskarte bleiben beim Scrollen oben stehen */
+  .stick-sentinel{height:1px;margin-bottom:-1px}
+  .stickyhead{position:sticky;top:0;z-index:40;background:var(--bg);margin-inline:calc(-1 * var(--gut));padding:0 var(--gut);
+    padding-top:env(safe-area-inset-top,0px);transition:box-shadow .2s}
+  .stickyhead .statusbar{margin-bottom:28px;transition:margin .2s,padding .2s}
+  .stickyhead.stuck{box-shadow:0 1px 0 var(--line),0 8px 18px -14px rgba(0,0,0,.35)}
+  .stickyhead.stuck .pagehead{padding:12px 0 10px}
+  .stickyhead.stuck .pagehead h1{font-size:24px}
+  .stickyhead.stuck .pagehead .sub{display:none}
+  .stickyhead.stuck .statusbar{margin-bottom:14px;padding-block:10px}
+  .stickyhead.stuck .statusbar .tally strong{font-size:16px}
+  @media (min-width:1181px){ .layout .cal{top:calc(var(--head-h,0px) + 16px);max-height:calc(100vh - var(--head-h,0px) - 32px)} }
+  @media (max-width:700px){
+    .stickyhead.stuck .pagehead{padding:8px 0 6px;gap:8px}
+    .stickyhead.stuck .pagehead h1{font-size:20px}
+    .stickyhead.stuck .pagehead .btn,.stickyhead.stuck .pagehead .order{padding:8px 10px;font-size:12px}
+    .stickyhead.stuck .statusbar{padding:8px 12px;margin-bottom:10px}
+    .stickyhead.stuck .statusbar .tally{display:none}
+    .stickyhead.stuck .progress > .ico{display:none}
+  }
   .layout{grid-template-columns:minmax(0,1.76fr) minmax(430px,1fr);gap:32px}
   @media (max-width:1180px){ .layout{grid-template-columns:1fr} }
 
@@ -511,6 +531,8 @@
   <div class="prefs"><span class="pill"><span class="ico i-users-sm" aria-hidden="true"></span>3 Personen</span><span class="pill">Ohne Pilze</span></div>
 </div>
 <div class="wrap" lang="de">
+  <div class="stick-sentinel" id="stickSentinel" aria-hidden="true"></div>
+  <div class="stickyhead" id="stickyHead">
   <header class="pagehead">
     <div>
       <h1>Wochenplan</h1>
@@ -531,6 +553,7 @@
       <span><span class="ico i-person" aria-hidden="true"></span><strong><span id="countEddy">0</span> ×</strong> Eddy Mittags</span>
     </div>
   </section>
+  </div>
 
   <div class="sheet-backdrop" id="recBg" hidden></div>
   <section class="modal" id="recModal" hidden aria-label="Rezept hinzufügen">
@@ -2044,6 +2067,23 @@ unit ist eins von: g, kg, ml, l, EL, TL, Stk, Bund, Topf, Dose, Pck, Becher, Gla
   document.getElementById('reset').addEventListener('click', ()=>{ plan = {}; sel = null; save(); render(); });
 
   render();
+
+  // Titel + Statuskarte: beim Scrollen kompakt oben stehen lassen
+  (function(){
+    const head = document.getElementById('stickyHead'), mark = document.getElementById('stickSentinel');
+    if (!head || !mark) return;
+    let stuck = false, raf = 0;
+    const setH = () => document.documentElement.style.setProperty('--head-h', head.offsetHeight + 'px');
+    const check = () => { raf = 0;
+      const top = mark.getBoundingClientRect().top;
+      const want = stuck ? top < -10 : top < -80; // etwas Abstand, damit es beim Kleinerwerden nicht flackert
+      if (want !== stuck){ stuck = want; head.classList.toggle('stuck', stuck); setH(); }
+    };
+    addEventListener('scroll', ()=>{ if (!raf) raf = requestAnimationFrame(check); }, {passive:true});
+    addEventListener('resize', setH);
+    try { new ResizeObserver(setH).observe(head); } catch(e){}
+    setH(); check();
+  })();
 })();
 </script>
 
