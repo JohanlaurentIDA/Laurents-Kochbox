@@ -1,7 +1,7 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Kochbox Wochenplan</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Libre+Franklin:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
   /* Layout: Gerichte-Stapel links (sticky), rechts Wochenraster: Zeilen = Tage, Spalten = Frühstück / Mittag / Abend + eigene Eddy-Spalte. */
   :root{
@@ -185,6 +185,10 @@
   .det-pic{background:var(--tint);display:grid;place-items:center;height:clamp(150px,30vh,280px);border-bottom:1px solid var(--line);overflow:hidden}
   .det-pic svg{height:88%;width:auto;max-width:90%}
   .det-pic.photo img{width:100%;height:100%;object-fit:cover}
+  .pic-tools{position:absolute;right:10px;bottom:10px;display:flex;gap:6px}
+  .pic-tools button,.pic-tools label{font:600 .72rem var(--f-mono);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:100px;padding:5px 11px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+  .pic-tools input{position:absolute;width:1px;height:1px;opacity:0}
+  .pic-tools .pic-msg{align-self:center;font:500 .7rem var(--f-mono);color:var(--surface);background:var(--ink);border-radius:100px;padding:5px 10px}
   .det-pic .initial{font-family:var(--f-display);font-weight:600;font-size:5rem;color:var(--accent)}
   .det-head{padding:22px clamp(18px,4vw,40px) 6px;display:flex;flex-direction:column;gap:8px}
   .det-kind{margin:0;font-family:var(--f-mono);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
@@ -328,99 +332,205 @@
     box-shadow:0 18px 30px -12px rgba(0,0,0,.35);rotate:-3deg;opacity:.95}
   body.is-dragging,body.is-dragging *{cursor:grabbing!important}
 
-  /* ---------- Rezepte in der Mitte, Kalender schmal rechts ---------- */
-  .wrap{max-width:1320px}
-  .layout{grid-template-columns:minmax(0,1fr) 320px;gap:36px}
-  .pantry{position:static;background:none;padding:0;gap:16px;border:1.5px dashed transparent;border-radius:12px}
-  .pantry.over{padding:10px}
-  .pantry-head{align-items:center;gap:12px;flex-wrap:wrap}
-  .pantry-head h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:700}
-  .pantry-head .add-recipe{border-radius:8px;padding:10px 16px;background:var(--ink);color:var(--surface);border:none}
-  .pantry-head .add-recipe:hover{opacity:.88}
-  .pantry .sub-head{display:flex;align-items:baseline;gap:10px;border-top:none;padding:0;margin:14px 0 0;
-    font:600 .95rem var(--f-body);letter-spacing:0;text-transform:none;color:var(--ink)}
-  .pantry .sub-head small{font:400 .85rem var(--f-body);color:var(--ink-soft);padding-left:10px;border-left:1px solid var(--line)}
-  .pantry .dish-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px}
-  .pantry .dish{border-radius:10px;overflow:hidden;box-shadow:0 1px 2px rgba(42,39,33,.06),0 10px 24px -14px rgba(42,39,33,.35)}
-  .pantry .dish:hover{transform:translateY(-3px)}
-  .pantry .dish:not(.custom) .pic,.pantry .dish.recipe .pic{aspect-ratio:16/10}
-  .pantry .dish:not(.custom) .txt{padding:14px 16px 16px;gap:8px;flex:1}
-  .pantry .dish:not(.custom) h3{font-family:var(--f-body);font-weight:700;font-size:1.08rem;line-height:1.25}
-  .pantry .dish .meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.8rem;color:var(--ink-soft);margin-top:auto;padding-top:4px}
-  .pantry .dish .meta span{display:inline-flex;align-items:center;gap:5px}
-  .pantry .dish .meta svg{width:14px;height:14px;flex:none}
-  .pantry .dish .tags{display:flex;flex-wrap:wrap;gap:6px}
-  .pantry .dish .tags span{font-size:.74rem;padding:3px 8px;border-radius:4px;background:var(--tint);color:var(--ink)}
-  .pantry .dish:not(.custom) .kind{display:none}
-  .pantry .uses{top:10px;left:10px;border-radius:100px;padding:3px 10px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
-  .pantry .pdf-link{top:10px;right:10px;border-radius:100px;padding:3px 9px}
-  .pantry .dish.recipe .remove{border-radius:100px}
-  .pantry .dish.recipe .txt{padding-right:40px}
-  .pantry #customList{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-  .pantry .dish.custom{border-radius:8px}
-  .pantry .add{max-width:520px}
-  .pantry .add input,.pantry .add button{border-radius:6px}
+  /* ---------- Figma-Design „Johans Kochbox — Wochenplan“ ---------- */
+  :root{
+    --bg:#F8F8F8; --bg-deep:#F1F1F1; --surface:#FFFFFF; --ink:#202020; --ink-soft:#656565; --ink-faint:#A0A0A0;
+    --line:#E3E3E3; --line-2:#DEDEDE; --slot:#FCFCFC; --slot-we:#F8F8F8; --slot-eddy:#F2F2F2; --slot-eddy-line:#D3D3D3;
+    --tag:#F0F0F0; --tag-ink:#606060; --pill:#F5F5F5; --pill-ink:#404040; --card-line:#E1E1E1; --track:#EBEBEB; --count:#E9E9E9;
+    --rewe:#CC0526; --rewe-deep:#A8041F; --rewe-text:#CC0526; --shadow:none;
+    --f-display:'Inter',system-ui,sans-serif; --f-body:'Inter',system-ui,sans-serif; --f-mono:'Inter',system-ui,sans-serif;
+    --gut:max(16px,env(safe-area-inset-left,0px));
+  }
+  @media (min-width:760px){ :root{--gut:40px} }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#161616; --bg-deep:#1E1E1E; --surface:#202020; --ink:#EDEDED; --ink-soft:#A3A3A3; --ink-faint:#6E6E6E;
+      --line:#333333; --line-2:#3A3A3A; --slot:#1C1C1C; --slot-we:#191919; --slot-eddy:#262626; --slot-eddy-line:#454545;
+      --tag:#2C2C2C; --tag-ink:#BDBDBD; --pill:#2A2A2A; --pill-ink:#D0D0D0; --card-line:#333333; --track:#333333; --count:#2C2C2C;
+      --rewe-text:#FF7A8C; --shadow:none;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#161616; --bg-deep:#1E1E1E; --surface:#202020; --ink:#EDEDED; --ink-soft:#A3A3A3; --ink-faint:#6E6E6E;
+    --line:#333333; --line-2:#3A3A3A; --slot:#1C1C1C; --slot-we:#191919; --slot-eddy:#262626; --slot-eddy-line:#454545;
+    --tag:#2C2C2C; --tag-ink:#BDBDBD; --pill:#2A2A2A; --pill-ink:#D0D0D0; --card-line:#333333; --track:#333333; --count:#2C2C2C;
+    --rewe-text:#FF7A8C; --shadow:none;
+  }
+  body{padding:0 0 48px;font-family:var(--f-body)}
+  .ico{display:inline-block;flex:none;width:16px;height:16px;background:currentColor;
+    -webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat}
+  .i-users-sm{--m:url(img/users-sm.svg)} .i-users{--m:url(img/users.svg)} .i-person{--m:url(img/person.svg)}
+  .i-trash{--m:url(img/trash.svg)} .i-arrow{--m:url(img/arrow.svg)} .i-grid{--m:url(img/grid.svg)}
+  .i-plus-sm{--m:url(img/plus-sm.svg)} .i-plus{--m:url(img/plus.svg)} .i-grip{--m:url(img/grip.svg)}
+  .i-clock{--m:url(img/clock.svg)} .i-list{--m:url(img/list.svg)} .i-info{--m:url(img/info.svg)}
+  .i-chev-l{--m:url(img/chevron-left.svg)} .i-chev-r{--m:url(img/chevron-right.svg)}
 
-  .cal{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);max-height:calc(100vh - 32px);overflow-y:auto;
-    background:var(--bg-deep);border-radius:12px;padding:14px 12px 12px;scrollbar-width:thin}
-  .cal .cal-head{margin-bottom:10px;padding:0 2px}
-  .cal .cal-head h2{font-size:1rem}
-  .cal .cal-head span{font-size:.7rem}
-  .cal .grid{gap:6px}
-  .cal .row.head{display:none}
-  .cal .row{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:7px;background:color-mix(in srgb,var(--surface) 55%,transparent);border-radius:8px}
-  .cal .daycell{grid-column:1/-1;flex-direction:row;align-items:baseline;gap:8px;padding:0 2px 2px}
-  .cal .daycell b{font-size:.92rem}
-  .cal .daycell span{font-size:.66rem}
-  .cal .eddy-col{margin-left:0;padding:0;background:none}
-  .cal .eddy-col::before{display:none}
-  .cal .slot{min-height:42px;font-size:.68rem;border-width:1px;border-radius:6px;padding:4px}
-  .cal .slot:not(.filled){flex-direction:column;gap:0}
-  .cal .slot .mlabel{display:block;font-family:var(--f-mono);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase}
-  .cal .slot .dish{border-radius:6px;overflow:hidden}
-  .cal .slot .dish .pic{width:36px}
-  .cal .slot .dish .pic .initial{font-size:1rem}
-  .cal .slot .dish .txt{padding:5px 22px 5px 6px}
-  .cal .slot .dish .kind{display:none}
-  .cal .slot .dish h3{font-size:.72rem;-webkit-line-clamp:2}
-  .cal .remove{width:18px;height:18px;font-size:11px;top:2px;right:2px}
-  .cal .hint{margin-top:12px;font-size:.64rem;flex-direction:column;gap:4px;line-height:1.4;padding:0 2px}
-  @media (max-width:900px){
-    .layout{grid-template-columns:1fr}
-    .cal{position:static;max-height:none}
-    .pantry .dish-list{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:var(--surface);
+    border-bottom:1px solid var(--line);padding:calc(18px + env(safe-area-inset-top,0px)) var(--gut) 18px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand b{font-weight:700;font-size:25px;line-height:1.4;color:var(--ink)}
+  .brand i{width:1px;height:22px;background:var(--line-2)}
+  .brand span{font-size:16px;color:var(--ink-soft)}
+  .prefs{display:flex;gap:12px}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:var(--pill);color:var(--pill-ink);font:500 12px/1.4 var(--f-body)}
+  .wrap{max-width:1680px;padding-inline:var(--gut)}
+
+  header.pagehead{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border:none;padding:32px 0 24px;margin:0}
+  .pagehead h1{font-family:var(--f-body);font-weight:600;font-size:clamp(28px,4vw,38px);line-height:1.4}
+  .pagehead .sub{font:400 14px/1.4 var(--f-body);color:var(--ink-soft);margin:6px 0 0}
+  .pagehead .actions{gap:12px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:9px;padding:12px 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface);
+    color:var(--pill-ink);font:600 13px/1.4 var(--f-body);cursor:pointer}
+  .btn:hover{border-color:var(--ink-faint)}
+  .btn .ico,.pagehead .order .ico{width:18px;height:18px}
+  .pagehead .order{gap:9px;padding:12px 16px;border-radius:10px;font:600 13px/1.4 var(--f-body)}
+
+  .statusbar{display:flex;justify-content:space-between;align-items:center;gap:16px 36px;flex-wrap:wrap;background:var(--surface);
+    border:1px solid var(--line);border-radius:12px;padding:18px 24px;margin-bottom:28px}
+  .progress{display:flex;align-items:center;gap:16px;min-width:0}
+  .progress > .ico{width:22px;height:22px;color:var(--ink-soft)}
+  .progress p{margin:0 0 6px;font:400 14px/1.4 var(--f-body);color:var(--ink-soft)}
+  .progress p strong{font-weight:600;color:var(--ink)}
+  .bar{width:min(320px,52vw);height:4px;border-radius:3px;background:var(--track);overflow:hidden}
+  .bar span{display:block;height:100%;width:0;background:var(--ink);border-radius:3px;transition:width .25s}
+  .statusbar .tally{display:flex;gap:16px 36px;flex-wrap:wrap}
+  .statusbar .tally > span{display:inline-flex;align-items:center;gap:10px;font:400 13px/1.4 var(--f-body);color:var(--ink-soft)}
+  .statusbar .tally .ico{width:20px;height:20px}
+  .statusbar .tally strong{font:600 20px/1.4 var(--f-body);color:var(--ink)}
+
+  .layout{grid-template-columns:minmax(0,1.76fr) minmax(430px,1fr);gap:32px}
+  @media (max-width:1180px){ .layout{grid-template-columns:1fr} }
+
+  .pantry{position:static;background:none;padding:0;gap:20px;border:1.5px dashed transparent;border-radius:12px}
+  .pantry.over{padding:10px}
+  .pantry-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .pantry-head h2{font:600 23px/1.35 var(--f-body)}
+  .add-recipe{display:inline-flex;align-items:center;gap:7px;padding:11px 13px;border-radius:9px;border:1px solid var(--line-2);
+    background:var(--surface);color:var(--ink);font:500 12px/1.35 var(--f-body);cursor:pointer}
+  .add-recipe:hover{border-color:var(--ink-faint)}
+  .pantry .sub-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:none;padding:0;margin:4px 0 0;
+    font:600 14px/1.35 var(--f-body);letter-spacing:0;text-transform:none;color:var(--ink)}
+  .pantry .sub-head small{font:500 12px/1.35 var(--f-body);color:var(--ink-soft);background:var(--count);padding:3px 7px;border-radius:5px}
+  .pantry .dish-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(340px,100%),1fr));gap:20px}
+  .pantry .dish{background:var(--surface);border:1px solid var(--card-line);border-radius:12px;overflow:hidden;box-shadow:none}
+  .pantry .dish:hover{transform:translateY(-2px);box-shadow:0 10px 24px -16px rgba(0,0,0,.35)}
+  .pantry .dish:not(.custom) .pic{aspect-ratio:488/220;border-bottom:none;background:var(--tint)}
+  .pantry .dish:not(.custom) .txt{padding:18px 20px;gap:14px;flex:1}
+  .pantry .dish:not(.custom) .kind{display:none}
+  .pantry .dish .name{display:flex;gap:8px;align-items:flex-start}
+  .pantry .dish:not(.custom) h3{flex:1;min-width:0;font:600 18px/1.3 var(--f-body);color:var(--ink)}
+  .pantry .dish .name .ico{color:var(--ink-faint);margin-top:2px}
+  .pantry .dish .tags{display:flex;flex-wrap:wrap;gap:6px}
+  .pantry .dish .tags span{font:500 11px/1.35 var(--f-body);padding:3px 7px;border-radius:4px;background:var(--tag);color:var(--tag-ink)}
+  .pantry .dish .meta{display:flex;flex-wrap:wrap;gap:4px 16px;font:400 12px/1.35 var(--f-body);color:var(--ink-soft);margin-top:auto}
+  .pantry .dish .meta span{display:inline-flex;align-items:center;gap:5px}
+  .pantry .dish .meta .ico{width:13px;height:13px}
+  .pantry .uses{top:12px;left:12px;border-radius:100px;padding:3px 10px;font:600 11px/1.35 var(--f-body);background:var(--surface);color:var(--ink);border:none;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+  .pantry .pdf-link{top:12px;right:12px;border-radius:100px;padding:3px 9px;font:600 11px var(--f-body)}
+  .pantry .dish.recipe .remove{border-radius:100px;top:auto;bottom:14px;right:14px}
+  .pantry .dish.recipe .txt{padding-right:46px}
+  .pantry #customList{grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr));gap:12px}
+  .pantry .dish.custom{border-radius:10px}
+  .pantry .dish.custom h3{font:600 14px/1.3 var(--f-body)}
+  .pantry .add{max-width:520px}
+  .pantry .add input{border-radius:9px;border-color:var(--line-2);padding:10px 12px;font-family:var(--f-body)}
+  .pantry .add button{border-radius:9px;font:600 16px var(--f-body);padding:0 16px}
+
+  /* Fotos aus dem Figma-Bild (alle vier Gerichte in einem Bild) */
+  .ph{display:block;width:100%;height:100%;background:url(img/gerichte.png) no-repeat;background-size:485.2% auto}
+  .ph-huhn{background-position:8.08% 37.5%} .ph-pasta{background-position:36.44% 37.5%}
+  .ph-rind{background-position:64.81% 37.5%} .ph-lachs{background-position:8.08% 79.45%}
+
+  /* Kalender */
+  .cal{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow-y:auto;scrollbar-width:thin;
+    border:1px solid var(--line-2);border-radius:10px;padding:20px;background:transparent;display:flex;flex-direction:column;gap:18px}
+  .cal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0}
+  .cal-title{display:flex;align-items:center;gap:10px}
+  .cal-head h2{font:600 18px/1.4 var(--f-body)}
+  .kw{font:500 11px/1.4 var(--f-body);color:var(--ink-soft);background:var(--bg-deep);padding:4px 8px;border-radius:5px}
+  .cal-head #range{display:block;margin-top:7px;font:400 13px/1.4 var(--f-body);color:var(--ink-soft)}
+  .weeknav{display:flex;gap:8px}
+  .weeknav button{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--ink-soft);cursor:pointer;padding:0}
+  .weeknav button:hover{border-color:var(--ink-faint)}
+  .weeknav button:disabled{opacity:.35;cursor:default}
+  .cal .grid{gap:8px}
+  .colhead{font:500 10px/1.4 var(--f-body);letter-spacing:0;text-transform:none;color:var(--ink-soft);text-align:center;padding:0}
+  .colhead.day{font-size:9px;color:var(--ink-faint);text-transform:uppercase}
+  .colhead.eddy{font-weight:600;color:var(--pill-ink);display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.2}
+  .colhead.eddy small{font:400 9px var(--f-body);color:var(--ink-faint)}
+  .slot{background:var(--slot);border:1px dashed var(--line-2);border-radius:6px;color:var(--ink-faint);font:500 11px var(--f-body)}
+  .slot .ico{width:18px;height:18px;color:var(--ink-faint)}
+  .row.weekend .slot:not(.filled){background:var(--slot-we)}
+  .eddy-col .slot:not(.filled){background:var(--slot-eddy);border-color:var(--slot-eddy-line)}
+  .slot.over,.slot.target{border-color:var(--ink);background:var(--bg-deep);color:var(--ink)}
+  .slot.filled{border:none;background:transparent}
+  .slot .dish{border-radius:6px;overflow:hidden;border:1px solid var(--card-line)}
+  .daycell b,.row.weekend .daycell b{font:600 14px/1.4 var(--f-body);color:var(--ink)}
+  .daycell span{font:400 12px/1.4 var(--f-body);color:var(--ink-soft)}
+  @media (min-width:701px){
+    .cal .row{grid-template-columns:62px repeat(4,minmax(0,1fr));gap:8px;align-items:center}
+    .cal .row.head{min-height:32px}
+    .daycell{align-items:center;justify-content:center;gap:3px;height:66px;padding:0}
+    .eddy-col{margin:0;padding:0;background:none;height:66px}
+    .eddy-col::before{display:none}
+    .cal .slot{height:66px;min-height:0;padding:0}
+    .cal .slot .dish{flex-direction:column;height:100%}
+    .cal .slot .dish .pic{width:100%;height:28px;flex:none;border:none}
+    .cal .slot .dish .pic svg{width:auto;height:100%}
+    .cal .slot .dish .pic .initial{font:600 13px var(--f-body)}
+    .cal .slot .dish .txt{padding:3px 5px;gap:0}
+    .cal .slot .dish .kind{display:none}
+    .cal .slot .dish h3{font:600 10px/1.2 var(--f-body);-webkit-line-clamp:2}
+    .cal .remove{width:16px;height:16px;font-size:10px;top:2px;right:2px;border-radius:4px}
   }
-  @media (max-width:480px){
+  .plan-hint{display:flex;gap:8px;align-items:center;background:var(--bg-deep);border-radius:9px;padding:12px}
+  .plan-hint .ico{width:18px;height:18px;color:var(--ink-soft)}
+  .plan-hint p{margin:0;font:500 12px/1.4 var(--f-body);color:var(--pill-ink)}
+  .plan-hint small{display:block;margin-top:3px;font:400 11px/1.4 var(--f-body);color:var(--ink-soft)}
+  @media (max-width:1180px){ .cal{position:static;max-height:none} }
+  @media (max-width:700px){
+    .statusbar{padding:14px 16px}
+    .cal{padding:14px}
+    .row{background:var(--bg-deep);border-radius:10px}
+    .slot{min-height:52px}
     .pantry .dish-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .pantry .dish:not(.custom) .txt{padding:10px 11px 12px;gap:8px}
+    .pantry .dish:not(.custom) h3{font-size:13.5px}
+    .pantry .dish .name .ico{display:none}
+    .pantry .dish .tags span{font-size:10px;padding:2px 6px}
+    .pantry .dish .meta{font-size:11px;gap:2px 10px}
+    .pantry .uses{top:6px;left:6px;font-size:10px;padding:2px 7px}
     .pantry #customList{grid-template-columns:1fr}
-    .pantry .sub-head{flex-wrap:wrap;gap:2px 10px}
-    .pantry .sub-head small{border-left:none;padding-left:0;flex-basis:100%;font-size:.78rem}
-    .pantry .dish:not(.custom) .txt{padding:9px 10px 11px;gap:6px}
-    .pantry .dish:not(.custom) h3{font-size:.88rem}
-    .pantry .dish .tags span{font-size:.66rem;padding:2px 6px}
-    .pantry .dish .meta{font-size:.7rem;gap:2px 10px}
-    .pantry .uses{top:6px;left:6px;font-size:.6rem;padding:2px 7px}
-    .pantry .dish.recipe .txt{padding-right:34px}
+    .pill{padding:6px 10px}
+    .brand b{font-size:21px}
   }
-  @media (prefers-reduced-motion:reduce){ .dish,.slot{transition:none} .ghost{rotate:0deg} }
 </style>
 
+<div class="topbar" lang="de">
+  <div class="brand"><b>Laurents</b><i aria-hidden="true"></i><span>kochbox</span></div>
+  <div class="prefs"><span class="pill"><span class="ico i-users-sm" aria-hidden="true"></span>3 Personen</span><span class="pill">Ohne Pilze</span></div>
+</div>
 <div class="wrap" lang="de">
-  <header>
+  <header class="pagehead">
     <div>
-      <p class="eyebrow">Johans Kochbox · 3 Personen · ohne Pilze</p>
       <h1>Wochenplan</h1>
       <p class="sub">Rezept greifen und auf eine Mahlzeit im Kalender ziehen.</p>
     </div>
-    <div class="status">
-      <div class="tally"><span><strong id="countFam">0</strong> Mahlzeiten Familie</span><span><strong id="countEddy">0</strong> × Eddy allein</span></div>
-      <span><strong id="countBox">0 von 4</strong> Kochbox-Gerichten verplant</span>
-      <div class="actions">
-        <button class="reset" id="reset" type="button">Plan leeren</button>
-        <button class="order" id="orderBtn" type="button">Bei REWE bestellen</button>
-      </div>
+    <div class="actions">
+      <button class="btn" id="reset" type="button"><span class="ico i-trash" aria-hidden="true"></span>Plan leeren</button>
+      <button class="order" id="orderBtn" type="button"><span class="ico i-arrow" aria-hidden="true"></span>Bei REWE bestellen</button>
     </div>
   </header>
+  <section class="statusbar" aria-label="Planungsstand">
+    <div class="progress">
+      <span class="ico i-grid" aria-hidden="true"></span>
+      <div><p><strong id="countBox">0 von 4</strong> Kochbox-Gerichten verplant</p><div class="bar"><span id="boxBar"></span></div></div>
+    </div>
+    <div class="tally">
+      <span><span class="ico i-users" aria-hidden="true"></span><strong id="countFam">0</strong> Mahlzeiten Familie</span>
+      <span><span class="ico i-person" aria-hidden="true"></span><strong><span id="countEddy">0</span> ×</strong> Eddy Mittags</span>
+    </div>
+  </section>
 
   <div class="sheet-backdrop" id="recBg" hidden></div>
   <section class="modal" id="recModal" hidden aria-label="Rezept hinzufügen">
@@ -518,7 +628,8 @@
         <button class="close" id="detClose" type="button" aria-label="Schließen">×</button>
       </div>
       <div class="det-scroll" id="detScroll">
-        <div class="det-pic" id="detPic"></div>
+        <div style="position:relative"><div class="det-pic" id="detPic"></div>
+        <div class="pic-tools" id="picTools"><span class="pic-msg" id="picMsg" hidden></span><button type="button" id="picReset" hidden>Original</button><label for="picInput">Bild ändern<input type="file" id="picInput" accept="image/*"></label></div></div>
         <div class="det-head">
           <p class="det-kind" id="detKind"></p>
           <h2 id="detTitle"></h2>
@@ -614,7 +725,7 @@
 
   <div class="layout">
     <section class="pantry" id="pantry" aria-label="Rezepte">
-      <div class="pantry-head"><h2>Rezepte</h2><button class="add-recipe" id="addRecipeBtn" type="button">+ Rezept hinzufügen</button></div>
+      <div class="pantry-head"><h2>Rezepte</h2><button class="add-recipe" id="addRecipeBtn" type="button"><span class="ico i-plus-sm" aria-hidden="true"></span>Rezept hinzufügen</button></div>
       <p class="sub-head">Kochbox <small id="countDishes"></small></p>
       <div class="dish-list" id="dishList"></div>
       <p class="sub-head" id="recipeHead">Neue Rezepte <small id="countRecipes"></small></p>
@@ -627,15 +738,21 @@
       </form>
     </section>
 
-    <aside class="cal" aria-label="Kalender nächste Woche">
-      <div class="cal-head"><h2>Nächste Woche</h2><span id="range"></span></div>
+    <aside class="cal" aria-label="Wochenkalender">
+      <div class="cal-head">
+        <div>
+          <div class="cal-title"><h2 id="weekTitle">Nächste Woche</h2><span class="kw" id="kw"></span></div>
+          <span id="range"></span>
+        </div>
+        <div class="weeknav">
+          <button type="button" id="weekPrev" aria-label="Vorherige Woche"><span class="ico i-chev-l" aria-hidden="true"></span></button>
+          <button type="button" id="weekNext" aria-label="Folgende Woche"><span class="ico i-chev-r" aria-hidden="true"></span></button>
+        </div>
+      </div>
       <div class="grid" id="grid"></div>
-      <div class="hint">
-        <span>Ziehen: Karte greifen und auf eine Mahlzeit loslassen</span>
-        <span>Karte antippen: Rezept groß lesen</span>
-        <span>Ohne Ziehen: im Rezept „Einplanen“, dann Feld antippen</span>
-        <span>Ein Gericht kann mehrfach eingeplant werden (z. B. Reste für Eddy)</span>
-        <span>Zurück zu den Rezepten ziehen entfernt es aus dem Plan</span>
+      <div class="plan-hint">
+        <span class="ico i-info" aria-hidden="true"></span>
+        <p><span id="hintTitle">Deine Woche ist noch frei.</span><small id="hintText">Ziehe ein Rezept auf einen freien Platz. Eddy plant in der eigenen Zeile.</small></p>
       </div>
     </aside>
   </div>
@@ -695,14 +812,25 @@
   const DAY_NAMES = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
   const today = new Date(); today.setHours(0,0,0,0);
   const toMon = ((8 - today.getDay()) % 7) || 7;
-  const monday = new Date(today); monday.setDate(today.getDate() + toMon);
+  // Wochen-Pfeile: 0 = nächste Woche, -1 = diese Woche, bis 4 Wochen voraus (steht in der Adresse hinter #w=)
+  const WEEK_MIN = -1, WEEK_MAX = 4;
+  let weekOff = 0; { const m = /(?:^|[#&])w=(-?\d+)/.exec(location.hash || ''); if (m) weekOff = Math.max(WEEK_MIN, Math.min(WEEK_MAX, parseInt(m[1],10) || 0)); }
+  const monday = new Date(today); monday.setDate(today.getDate() + toMon + 7*weekOff);
   const pad = n => String(n).padStart(2,'0');
   const keyOf = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
   const days = DAY_NAMES.map((n,i)=>{ const d=new Date(monday); d.setDate(monday.getDate()+i); return {name:n, date:d, key:keyOf(d)}; });
   const fmt = d => pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.';
   function isoWeek(d){ const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())); const n=t.getUTCDay()||7; t.setUTCDate(t.getUTCDate()+4-n);
     const y=new Date(Date.UTC(t.getUTCFullYear(),0,1)); return Math.ceil(((t-y)/864e5+1)/7); }
-  document.getElementById('range').textContent = `KW ${isoWeek(monday)} · ${fmt(days[0].date)}–${fmt(days[6].date)}${days[6].date.getFullYear()}`;
+  document.getElementById('range').textContent = `${fmt(days[0].date)}–${fmt(days[6].date)}${days[6].date.getFullYear()}`;
+  document.getElementById('kw').textContent = 'KW ' + isoWeek(monday);
+  document.getElementById('weekTitle').textContent = weekOff === -1 ? 'Diese Woche' : weekOff === 0 ? 'Nächste Woche' : `In ${weekOff+1} Wochen`;
+  (function(){
+    const go = off => { location.hash = off ? 'w=' + off : 'w=0'; location.reload(); };
+    const p = document.getElementById('weekPrev'), n = document.getElementById('weekNext');
+    p.disabled = weekOff <= WEEK_MIN; n.disabled = weekOff >= WEEK_MAX;
+    p.addEventListener('click', ()=>go(weekOff - 1)); n.addEventListener('click', ()=>go(weekOff + 1));
+  })();
 
   // Zustand: plan["YYYY-MM-DD|f"] = dishId ; custom = [{id,title}]
   const STORE = 'kochbox-plan-v2-' + days[0].key, CSTORE = 'kochbox-custom';
@@ -711,6 +839,7 @@
   let custom = load(CSTORE, null);
   let plan = load(STORE, null);
   if (custom === null) custom = [{id:'c-muesli', title:'Müsli mit Obst'}, {id:'c-brote', title:'Belegte Brote'}];
+  if (plan === null && weekOff !== 0) plan = {}; // Beispielplan nur für die nächste Woche
   if (plan === null){
     plan = {};
     const k = (i,m)=>days[i].key+'|'+m;
@@ -735,14 +864,52 @@
   const pantry = document.getElementById('pantry'), grid = document.getElementById('grid');
   let sel = null; // {id, from}
 
-  const ICON_TIME = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 4.6V8l2.4 1.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
-  const ICON_LIST = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 4.5h8M5.5 8h8M5.5 11.5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="2.6" cy="4.5" r="1" fill="currentColor"/><circle cx="2.6" cy="8" r="1" fill="currentColor"/><circle cx="2.6" cy="11.5" r="1" fill="currentColor"/></svg>';
+  const ICON_TIME = '<span class="ico i-clock" aria-hidden="true"></span>';
+  const ICON_LIST = '<span class="ico i-list" aria-hidden="true"></span>';
+  // ---------- Eigene Bilder pro Gericht ----------
+  // pics[dishId] = data:image/jpeg… ; gilt für Kochbox, neue Rezepte und eigene Gerichte
+  const DEFAULT_PICS = { rind: 'img/rind.jpg' };
+  const PICSTORE = 'kochbox-pics';
+  let pics = load(PICSTORE, {}) || {};
+  const picId = id => String(id).replace(/[^A-Za-z0-9_-]/g,'_').slice(0,120);
+  const picUrl = id => { const v = pics[picId(id)]; return (typeof v==='string' && SAFE_IMG.test(v)) ? v : (DEFAULT_PICS[id] || ''); };
+  const picHtml = d => { const u = picUrl(d.id); return u ? `<img src="${u}" alt="">` : ''; };
+  function savePic(id, dataUrl){
+    const k = picId(id);
+    if (dataUrl) pics[k] = dataUrl; else delete pics[k];
+    put(PICSTORE, pics);
+    if (db){ const ref = db.collection('pics').doc(k);
+      return (dataUrl ? ref.set({img:dataUrl, updatedAt:new Date().toISOString()}) : ref.delete()); }
+    return Promise.resolve();
+  }
+  function fileToPic(file){
+    return new Promise((res, rej)=>{
+      const url = URL.createObjectURL(file), im = new Image();
+      im.onload = ()=>{
+        const W = 720, H = 450, r = W/H;
+        let sw = im.naturalWidth, sh = sw / r;
+        if (sh > im.naturalHeight){ sh = im.naturalHeight; sw = sh * r; }
+        const sx = (im.naturalWidth - sw)/2, sy = (im.naturalHeight - sh)/2;
+        const c = document.createElement('canvas'); c.width = W; c.height = H;
+        const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0,0,W,H);
+        x.drawImage(im, sx, sy, sw, sh, 0, 0, W, H);
+        URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', .78));
+      };
+      im.onerror = ()=>{ URL.revokeObjectURL(url); rej(new Error('bild')); };
+      im.src = url;
+    });
+  }
+  // Reihenfolge: eigenes Bild > Foto aus dem Figma-Design > Zeichnung/Vorschaubild > Anfangsbuchstabe
+  const PHOTOS = {huhn:1, pasta:1, rind:1, lachs:1};
+  const picOf = d => picHtml(d) || (PHOTOS[d.id] ? `<span class="ph ph-${d.id}" role="img" aria-label="${esc(d.title)}"></span>`
+    : (d.img || `<span class="initial">${esc(d.title.trim().charAt(0).toUpperCase())}</span>`));
+  const isPhoto = d => !!picUrl(d.id) || !!PHOTOS[d.id] || (!!d.recipe && !!d.img);
   function card(d, from){
     const el = document.createElement('article');
     el.className = 'dish ' + d.cls + (d.custom?' custom':'') + (d.recipe?' recipe':'') + (sel && sel.id===d.id && sel.from===from ? ' selected':'');
     el.dataset.id = d.id; el.dataset.from = from || ''; el.tabIndex = 0;
     el.setAttribute('aria-label', d.title);
-    const pic = d.img || `<span class="initial">${esc(d.title.trim().charAt(0).toUpperCase())}</span>`;
+    const pic = picOf(d);
     const n = from ? 0 : uses(d.id);
     const badge = n ? `<span class="uses">${n}× im Plan</span>` : '';
     let extra = '';
@@ -756,7 +923,8 @@
       const tags = [d.kind, level, d.recipe && d.src ? d.src : ''].filter(Boolean);
       extra = `<div class="tags">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>${meta.length ? `<div class="meta">${meta.join('')}</div>` : ''}`;
     }
-    el.innerHTML = `<div class="pic">${pic}</div><div class="txt">${d.custom && !from ? '' : `<span class="kind">${d.kind}</span>`}<h3>${esc(d.title)}</h3>${extra}${d.custom?badge:''}</div>${d.custom?'':badge}`;
+    const title = (!from && !d.custom) ? `<div class="name"><h3>${esc(d.title)}</h3><span class="ico i-grip" aria-hidden="true"></span></div>` : `<h3>${esc(d.title)}</h3>`;
+    el.innerHTML = `<div class="pic">${pic}</div><div class="txt">${d.custom && !from ? '' : `<span class="kind">${d.kind}</span>`}${title}${extra}${d.custom?badge:''}</div>${d.custom?'':badge}`;
     if (d.recipe && !from && d.pdf){
       const a = document.createElement('a'); a.className='pdf-link'; a.href=d.pdf; a.target='_blank'; a.rel='noopener'; a.textContent='PDF ↗';
       a.addEventListener('pointerdown', e=>e.stopPropagation()); a.addEventListener('click', e=>e.stopPropagation());
@@ -806,7 +974,7 @@
 
     grid.innerHTML = '';
     const head = document.createElement('div'); head.className='row head';
-    head.innerHTML = '<span></span>' + MEALS.map(m=>`<span class="colhead${m.eddy?' eddy':''}"${m.eddy?' style="padding-left:12px"':''}>${m.eddy?'Eddy allein':m.name}</span>`).join('');
+    head.innerHTML = '<span class="colhead day">Tag</span>' + MEALS.map(m=>`<span class="colhead${m.eddy?' eddy':''}">${m.eddy?'Eddy<small>allein</small>':m.name}</span>`).join('');
     grid.appendChild(head);
 
     days.forEach((day,i)=>{
@@ -820,7 +988,7 @@
 
         if (d){ slot.classList.add('filled'); slot.appendChild(card(d, key)); }
         else {
-          slot.innerHTML = `<span class="mlabel">${m.eddy?'Eddy':m.name}</span><span>${sel ? 'Hier ablegen' : '+'}</span>`;
+          slot.innerHTML = `<span class="mlabel">${m.eddy?'Eddy':m.name}</span>${sel ? '<span>Hier ablegen</span>' : '<span class="ico i-plus" aria-hidden="true"></span>'}`;
           slot.tabIndex = 0; if (sel) slot.classList.add('target');
         }
         slot.addEventListener('click', ()=>{ if (sel && !slot.classList.contains('filled')) place(sel.id, sel.from, key); });
@@ -834,7 +1002,14 @@
     const vals = Object.entries(plan);
     document.getElementById('countFam').textContent = vals.filter(([k])=>!k.endsWith('|e')).length;
     document.getElementById('countEddy').textContent = vals.filter(([k])=>k.endsWith('|e')).length;
-    document.getElementById('countBox').textContent = `${DISHES.filter(d=>uses(d.id)).length} von ${DISHES.length}`;
+    const boxN = DISHES.filter(d=>uses(d.id)).length;
+    document.getElementById('countBox').textContent = `${boxN} von ${DISHES.length}`;
+    document.getElementById('boxBar').style.width = (DISHES.length ? Math.round(100*boxN/DISHES.length) : 0) + '%';
+    const nPlan = vals.length;
+    document.getElementById('hintTitle').textContent = nPlan ? `${nPlan} ${nPlan===1 ? 'Mahlzeit' : 'Mahlzeiten'} geplant.` : 'Deine Woche ist noch frei.';
+    document.getElementById('hintText').textContent = nPlan
+      ? 'Rezept antippen zum Lesen. Zurück zu den Rezepten ziehen entfernt es aus dem Plan.'
+      : 'Ziehe ein Rezept auf einen freien Platz. Eddy plant in der eigenen Zeile.';
   }
 
   // from = Herkunftsfeld (null = aus der Liste, also kopieren). to = Zielfeld (null = entfernen)
@@ -1285,6 +1460,12 @@ ${rows.join('\n')}`;
     try { assets = await window.claude.use('assets'); } catch(e){ assets = null; }
     try { sampleFn = await window.claude.use('sample'); } catch(e){ sampleFn = null; }
     if (db){
+      db.collection('pics').onSnapshot(snap=>{
+        const m = {}; snap.docs.forEach(x=>{ const v = x.data(); if (v && typeof v.img==='string' && SAFE_IMG.test(v.img)) m[x.id] = v.img; });
+        pics = m; put(PICSTORE, pics);
+        if (!drag) render();
+        if (detCtx){ const d = find(detCtx.id); if (d) showDetPic(d); }
+      }, e=>console.warn('Bilder konnten nicht geladen werden', e));
       db.collection('products').onSnapshot(snap=>{
         const m = {}; snap.docs.forEach(x=>{ const v = x.data(); if (v && okUrl(v.url)) m[x.id] = v; });
         products = m; put(PSTORE, products);
@@ -1782,8 +1963,7 @@ unit ist eins von: g, kg, ml, l, EL, TL, Stk, Bund, Topf, Dose, Pck, Becher, Gla
     else if (d.recipe){ const r = recipes.find(x=>x.id===d.docId) || {}; info.time = String(r.time||''); info.steps = splitSteps(r.steps); info.pdf = d.pdf; info.source = String(r.source||''); }
     const ing = ING[id] || d.ing || [];
     const box = $('detBox'); box.className = 'det ' + d.cls + (bigText ? ' big' : '');
-    $('detPic').innerHTML = d.img || `<span class="initial">${esc(d.title.trim().charAt(0).toUpperCase())}</span>`;
-    $('detPic').classList.toggle('photo', !!d.recipe && !!d.img);
+    showDetPic(d);
     $('detKind').textContent = d.kind;
     $('detTitle').textContent = d.title;
     $('detTag').textContent = info.tagline; $('detTag').hidden = !info.tagline;
@@ -1812,6 +1992,29 @@ unit ist eins von: g, kg, ml, l, EL, TL, Stk, Bund, Topf, Dose, Pck, Becher, Gla
     detModal.hidden = false; detBg.hidden = false; $('detScroll').scrollTop = 0; $('detClose').focus();
     try { navigator.wakeLock && navigator.wakeLock.request('screen').then(l=>{ wakeLock = l; }, ()=>{}); } catch(e){}
   }
+  function showDetPic(d){
+    $('detPic').innerHTML = picOf(d);
+    $('detPic').classList.toggle('photo', isPhoto(d));
+    $('picReset').hidden = !pics[picId(d.id)];
+    $('picReset').textContent = DEFAULT_PICS[d.id] || d.recipe || PHOTOS[d.id] ? 'Vorheriges Bild' : 'Bild entfernen';
+    $('picMsg').hidden = true;
+  }
+  $('picInput').addEventListener('change', async e=>{
+    const f = e.target.files && e.target.files[0]; e.target.value = '';
+    const c = detCtx; if (!f || !c) return;
+    const msg = $('picMsg'); msg.hidden = false; msg.textContent = 'Wird gespeichert …';
+    try {
+      const data = await fileToPic(f);
+      await savePic(c.id, data);
+      const d = find(c.id); if (d && detCtx && detCtx.id===c.id) showDetPic(d);
+      render();
+    } catch(err){ msg.hidden = false; msg.textContent = 'Bild konnte nicht gespeichert werden'; console.warn(err); }
+  });
+  $('picReset').addEventListener('click', async ()=>{
+    const c = detCtx; if (!c) return;
+    try { await savePic(c.id, ''); } catch(e){ console.warn(e); }
+    const d = find(c.id); if (d) showDetPic(d); render();
+  });
   function closeDetail(){
     detModal.hidden = true; detBg.hidden = true; detCtx = null;
     try { wakeLock && wakeLock.release(); } catch(e){} wakeLock = null;
