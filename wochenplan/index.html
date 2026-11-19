@@ -436,10 +436,10 @@
   .pantry .add input{border-radius:9px;border-color:var(--line-2);padding:10px 12px;font-family:var(--f-body)}
   .pantry .add button{border-radius:9px;font:600 16px var(--f-body);padding:0 16px}
 
-  /* Fotos aus dem Figma-Bild (alle vier Gerichte in einem Bild) */
-  .ph{display:block;width:100%;height:100%;background:url(img/gerichte.png) no-repeat;background-size:485.2% auto}
-  .ph-huhn{background-position:8.08% 37.5%} .ph-pasta{background-position:36.44% 37.5%}
-  .ph-rind{background-position:64.81% 37.5%} .ph-lachs{background-position:8.08% 79.45%}
+  /* Fotos aus dem Figma-Bild: Ausschnitte genau wie in Figma (Rahmen 488 × 220, Bild darin verschoben und skaliert) */
+  .dish .pic,.det-pic{position:relative;overflow:hidden}
+  .phf{position:absolute;left:0;right:0;top:50%;translate:0 -50%;aspect-ratio:488/220;overflow:hidden;display:block;pointer-events:none}
+  .phf img,.dish .pic .phf img,.det-pic .phf img{position:absolute;display:block;max-width:none;object-fit:fill}
 
   /* Kalender */
   .cal{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow-y:auto;scrollbar-width:thin;
@@ -900,9 +900,16 @@
     });
   }
   // Reihenfolge: eigenes Bild > Foto aus dem Figma-Design > Zeichnung/Vorschaubild > Anfangsbuchstabe
-  const PHOTOS = {huhn:1, pasta:1, rind:1, lachs:1};
-  const picOf = d => picHtml(d) || (PHOTOS[d.id] ? `<span class="ph ph-${d.id}" role="img" aria-label="${esc(d.title)}"></span>`
-    : (d.img || `<span class="initial">${esc(d.title.trim().charAt(0).toUpperCase())}</span>`));
+  // Werte aus Figma (Knoten 3:65, 3:86, 3:108, 3:129): Breite, Höhe, links, oben in % des Bildrahmens
+  const PHOTOS = {
+    huhn:  [481.62, 997.94, -30.51, -341.97],
+    pasta: [485.19, 704.89, -140,   -226.86],
+    rind:  [481.62, 997.94, -247.43, -341.97],
+    lachs: [481.62, 699.71, -30.51, -476.82]
+  };
+  const ownPic = d => { const v = pics[picId(d.id)]; return (typeof v==='string' && SAFE_IMG.test(v)) ? `<img src="${v}" alt="">` : ''; };
+  const figmaPic = d => { const p = PHOTOS[d.id]; return p ? `<span class="phf" role="img" aria-label="${esc(d.title)}"><img src="img/gerichte.png" alt="" style="width:${p[0]}%;height:${p[1]}%;left:${p[2]}%;top:${p[3]}%"></span>` : ''; };
+  const picOf = d => ownPic(d) || figmaPic(d) || picHtml(d) || d.img || `<span class="initial">${esc(d.title.trim().charAt(0).toUpperCase())}</span>`;
   const isPhoto = d => !!picUrl(d.id) || !!PHOTOS[d.id] || (!!d.recipe && !!d.img);
   function card(d, from){
     const el = document.createElement('article');
