@@ -329,7 +329,28 @@
 
   .hint{margin-top:18px;font-family:var(--f-mono);font-size:.74rem;color:var(--ink-soft);display:flex;flex-wrap:wrap;gap:6px 22px}
 
-  .ghost{position:fixed;left:0;top:0;pointer-events:none;z-index:50;width:200px;
+  /* Ablage-Kalender, der beim Ziehen unten erscheint, wenn der echte Kalender nicht zu sehen ist */
+  .drop-dock{position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:55;max-width:560px;margin:0 auto;
+    background:var(--surface);border:1px solid var(--line-2);border-radius:12px;padding:10px 10px 8px;
+    box-shadow:0 -10px 34px -12px rgba(0,0,0,.4);font-family:var(--f-body)}
+  .dd-title{margin:0 0 6px;font:600 13px/1.3 var(--f-body);color:var(--ink);display:flex;justify-content:space-between;gap:8px}
+  .dd-title span{font-weight:500;font-size:11px;color:var(--ink-soft)}
+  .dd-row{display:grid;grid-template-columns:40px repeat(4,minmax(0,1fr));gap:4px;margin-top:4px;align-items:center}
+  .dd-row.dd-head span{font:500 10px/1.2 var(--f-body);color:var(--ink-soft);text-align:center}
+  .dd-day{font:600 12px/1.1 var(--f-body);color:var(--ink)}
+  .dd-day small{display:block;font:400 10px var(--f-body);color:var(--ink-soft)}
+  .drop-dock .slot{height:32px;min-height:0;padding:2px 5px;border-radius:5px;font:500 10px/1.15 var(--f-body);color:var(--ink-faint);
+    justify-content:center;text-align:center;overflow:hidden}
+  .drop-dock .slot.dd-filled{border-style:solid;background:var(--bg-deep);color:var(--ink-soft)}
+  .drop-dock .slot.dd-filled span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .drop-dock .slot.dd-eddy{background:var(--slot-eddy);border-color:var(--slot-eddy-line)}
+  .drop-dock .slot.over{border:1.5px solid var(--ink);background:var(--bg-deep);color:var(--ink)}
+  .ghost.dish{border-radius:10px;overflow:hidden;border:1px solid var(--card-line);background:var(--surface)}
+  .ghost .tags,.ghost .meta,.ghost .kind,.ghost .name .ico,.ghost .ing-btn,.ghost .pdf-link{display:none!important}
+  .ghost .pic{height:64px!important;aspect-ratio:auto!important;width:100%!important;border:none!important}
+  .ghost .txt{padding:7px 10px!important;gap:0!important}
+  .ghost h3{font:600 12px/1.25 var(--f-body)!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .ghost{position:fixed;left:0;top:0;pointer-events:none;z-index:58;width:200px;
     box-shadow:0 18px 30px -12px rgba(0,0,0,.35);rotate:-3deg;opacity:.95}
   body.is-dragging,body.is-dragging *{cursor:grabbing!important}
 
@@ -747,6 +768,10 @@
     <textarea id="copyFallback" class="copy-fallback" readonly hidden aria-label="Einkaufsliste als Text"></textarea>
   </aside>
 
+  <div class="drop-dock" id="dropDock" hidden>
+    <p class="dd-title">Hier ablegen <span id="ddWeek"></span></p>
+    <div class="dd-grid" id="ddGrid"></div>
+  </div>
   <div class="layout">
     <section class="pantry" id="pantry" aria-label="Rezepte">
       <div class="pantry-head"><h2>Rezepte</h2><button class="add-recipe" id="addRecipeBtn" type="button"><span class="ico i-plus-sm" aria-hidden="true"></span>Rezept hinzufügen</button></div>
@@ -1095,10 +1120,40 @@
         v = 0;
       }
     }
+    // Ablage-Kalender unten offen: Unterkante nicht zum Scrollen nutzen, dort liegen die Felder
+    const dock = document.getElementById('dropDock');
+    if (dock && !dock.hidden && v > 0) v = 0;
     if (v) scrollBy(0, v);
     updateOver();
     autoRaf = setTimeout(autoScroll, 16);
   }
+  const SHORT_MEAL = {f:'Früh', m:'Mittag', a:'Abend', e:'Eddy'};
+  function showDock(){
+    const cal = document.querySelector('.cal'), dock = document.getElementById('dropDock');
+    if (!cal || !dock) return;
+    const r = cal.getBoundingClientRect(), H = innerHeight;
+    const visible = Math.min(r.bottom, H) - Math.max(r.top, 0);
+    if (visible > Math.min(300, H * 0.45)) return; // echter Kalender ist gut zu sehen
+    const g = document.getElementById('ddGrid'); g.innerHTML = '';
+    const head = document.createElement('div'); head.className = 'dd-row dd-head';
+    head.innerHTML = '<span></span>' + MEALS.map(m=>`<span>${SHORT_MEAL[m.k] || m.name}</span>`).join('');
+    g.appendChild(head);
+    days.forEach(day=>{
+      const row = document.createElement('div'); row.className = 'dd-row';
+      row.innerHTML = `<span class="dd-day">${day.name.slice(0,2)}<small>${fmt(day.date)}</small></span>`;
+      MEALS.forEach(m=>{
+        const key = day.key + '|' + m.k, d = plan[key] && find(plan[key]);
+        const s = document.createElement('div'); s.className = 'slot dd' + (m.eddy ? ' dd-eddy' : '') + (d ? ' dd-filled' : '');
+        s.dataset.key = key; s.setAttribute('aria-label', `${day.name}, ${m.eddy ? 'Eddy allein' : m.name}`);
+        s.innerHTML = d ? `<span>${esc(d.title)}</span>` : '+';
+        row.appendChild(s);
+      });
+      g.appendChild(row);
+    });
+    document.getElementById('ddWeek').textContent = document.getElementById('weekTitle').textContent + ' · ' + document.getElementById('kw').textContent;
+    dock.hidden = false;
+  }
+  function hideDock(){ const dock = document.getElementById('dropDock'); if (dock) dock.hidden = true; }
   function startDrag(e){
     const el = drag.el;
     drag.started = true;
@@ -1106,10 +1161,11 @@
     drag.dx = Math.min(Math.max(e.clientX - r.left, 0), 30); drag.dy = Math.min(Math.max(e.clientY - r.top, 0), 30);
     const g = el.cloneNode(true); g.classList.add('ghost'); g.classList.remove('selected','lifted');
     g.querySelector('.remove')?.remove(); g.querySelector('.uses')?.remove();
-    g.style.width = Math.min(Math.max(r.width,170),230) + 'px';
+    g.style.width = '150px'; g.style.flexDirection = 'column';
     document.body.appendChild(g); drag.ghost = g;
     if (el.dataset.from) el.classList.add('dragging-src');
     document.body.classList.add('is-dragging');
+    showDock();
     if (!autoRaf) autoRaf = setTimeout(autoScroll, 16);
   }
   // Solange am Handy gezogen wird, darf die Seite nicht selbst scrollen
@@ -1156,6 +1212,7 @@
       if (autoRaf){ clearTimeout(autoRaf); autoRaf = 0; }
       document.body.classList.remove('is-dragging');
       d.ghost?.remove(); d.over?.classList.remove('over'); el.classList.remove('dragging-src','lifted');
+      hideDock();
       if (!d.started){ if (!cancelled) tap(el); return; }
       if (cancelled || !d.over) return;
       const from = el.dataset.from || null;
