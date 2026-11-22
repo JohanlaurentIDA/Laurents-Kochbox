@@ -69,6 +69,7 @@
 
   .dish{background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);cursor:grab;position:relative;
     touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;display:flex;flex-direction:column;transition:transform .12s,box-shadow .12s}
+  .dish img,.dish svg,.dish .phf{-webkit-user-drag:none;user-drag:none;user-select:none;-webkit-user-select:none}
   .dish.lifted{transform:scale(.97);box-shadow:0 0 0 2px var(--ink),0 12px 26px -12px rgba(0,0,0,.4)}
   .dish:hover{transform:translateY(-2px)}
   .dish.selected{outline:2px solid var(--accent);outline-offset:2px}
@@ -902,7 +903,7 @@
   const SAFE_IMG = /^data:image\/(jpeg|png);base64,[A-Za-z0-9+\/=]+$/;
   const recipeDish = r => { const kind = KIND_CLS[r.kind] ? r.kind : 'Sonstiges';
     return { id:'r-'+r.id, docId:r.id, title:String(r.title||'Rezept'), kind, cls:KIND_CLS[kind], recipe:true,
-      img: (typeof r.thumb==='string' && SAFE_IMG.test(r.thumb)) ? `<img src="${r.thumb}" alt="">` : '', ing:recipeIng(r),
+      img: (typeof r.thumb==='string' && SAFE_IMG.test(r.thumb)) ? `<img draggable="false" src="${r.thumb}" alt="">` : '', ing:recipeIng(r),
       time: String(r.time||'').slice(0,20), src: /^https:\/\//i.test(String(r.source||'')) ? platformOf(String(r.source)) : (r.pdfId ? 'PDF' : ''),
       pdf: (typeof r.pdfId==='string' && /^[0-9a-f]{32}$/.test(r.pdfId)) ? '/_blob/'+r.pdfId : '' }; };
   const all = () => DISHES.concat(recipes.map(recipeDish), custom.map(c=>{ const ing = recipeIng(c); return {id:c.id, title:String(c.title||''), cls:'stone', kind:'Eigenes', custom:true, ing, hasIng: ing.length>0}; }));
@@ -922,7 +923,7 @@
   let pics = load(PICSTORE, {}) || {};
   const picId = id => String(id).replace(/[^A-Za-z0-9_-]/g,'_').slice(0,120);
   const picUrl = id => { const v = pics[picId(id)]; return (typeof v==='string' && SAFE_IMG.test(v)) ? v : (DEFAULT_PICS[id] || ''); };
-  const picHtml = d => { const u = picUrl(d.id); return u ? `<img src="${u}" alt="">` : ''; };
+  const picHtml = d => { const u = picUrl(d.id); return u ? `<img draggable="false" src="${u}" alt="">` : ''; };
   function savePic(id, dataUrl){
     const k = picId(id);
     if (dataUrl) pics[k] = dataUrl; else delete pics[k];
@@ -956,8 +957,8 @@
     rind:  [481.62, 997.94, -247.43, -341.97],
     lachs: [481.62, 699.71, -30.51, -476.82]
   };
-  const ownPic = d => { const v = pics[picId(d.id)]; return (typeof v==='string' && SAFE_IMG.test(v)) ? `<img src="${v}" alt="">` : ''; };
-  const figmaPic = d => { const p = PHOTOS[d.id]; return p ? `<span class="phf" role="img" aria-label="${esc(d.title)}"><img src="img/gerichte.png" alt="" style="width:${p[0]}%;height:${p[1]}%;left:${p[2]}%;top:${p[3]}%"></span>` : ''; };
+  const ownPic = d => { const v = pics[picId(d.id)]; return (typeof v==='string' && SAFE_IMG.test(v)) ? `<img draggable="false" src="${v}" alt="">` : ''; };
+  const figmaPic = d => { const p = PHOTOS[d.id]; return p ? `<span class="phf" role="img" aria-label="${esc(d.title)}"><img draggable="false" src="img/gerichte.png" alt="" style="width:${p[0]}%;height:${p[1]}%;left:${p[2]}%;top:${p[3]}%"></span>` : ''; };
   const picOf = d => ownPic(d) || figmaPic(d) || picHtml(d) || d.img || `<span class="initial">${esc(d.title.trim().charAt(0).toUpperCase())}</span>`;
   const isPhoto = d => !!picUrl(d.id) || !!PHOTOS[d.id] || (!!d.recipe && !!d.img);
   function card(d, from){
@@ -1171,6 +1172,8 @@
   // Solange am Handy gezogen wird, darf die Seite nicht selbst scrollen
   document.addEventListener('touchmove', e=>{ if (drag && (drag.armed || drag.started)) e.preventDefault(); }, {passive:false});
   document.addEventListener('contextmenu', e=>{ if (e.target.closest && e.target.closest('.dish')) e.preventDefault(); });
+  // Bilder in Karten nicht vom Browser selbst ziehen lassen (sonst bricht unser Ziehen ab, wenn man auf dem Foto ansetzt)
+  document.addEventListener('dragstart', e=>{ if (e.target.closest && e.target.closest('.dish')) e.preventDefault(); });
 
   function attachDrag(el){
     el.addEventListener('pointerdown', e=>{
