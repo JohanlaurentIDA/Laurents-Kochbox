@@ -68,7 +68,8 @@
   @media (max-width:900px) and (min-width:480px){ .dish-list{display:grid;grid-template-columns:1fr 1fr} }
 
   .dish{background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);cursor:grab;position:relative;
-    touch-action:none;user-select:none;-webkit-user-select:none;display:flex;flex-direction:column;transition:transform .12s}
+    touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;display:flex;flex-direction:column;transition:transform .12s,box-shadow .12s}
+  .dish.lifted{transform:scale(.97);box-shadow:0 0 0 2px var(--ink),0 12px 26px -12px rgba(0,0,0,.4)}
   .dish:hover{transform:translateY(-2px)}
   .dish.selected{outline:2px solid var(--accent);outline-offset:2px}
   .dish.dragging-src{opacity:.35}
@@ -775,7 +776,7 @@
       <div class="grid" id="grid"></div>
       <div class="plan-hint">
         <span class="ico i-info" aria-hidden="true"></span>
-        <p><span id="hintTitle">Deine Woche ist noch frei.</span><small id="hintText">Ziehe ein Rezept auf einen freien Platz. Eddy plant in der eigenen Zeile.</small></p>
+        <p><span id="hintTitle">Deine Woche ist noch frei.</span><small id="hintText">Ziehe ein Rezept auf einen freien Platz (am Handy kurz gedrückt halten). Eddy plant in der eigenen Zeile.</small></p>
       </div>
     </aside>
   </div>
@@ -1039,7 +1040,7 @@
     document.getElementById('hintTitle').textContent = nPlan ? `${nPlan} ${nPlan===1 ? 'Mahlzeit' : 'Mahlzeiten'} geplant.` : 'Deine Woche ist noch frei.';
     document.getElementById('hintText').textContent = nPlan
       ? 'Rezept antippen zum Lesen. Zurück zu den Rezepten ziehen entfernt es aus dem Plan.'
-      : 'Ziehe ein Rezept auf einen freien Platz. Eddy plant in der eigenen Zeile.';
+      : 'Ziehe ein Rezept auf einen freien Platz (am Handy kurz gedrückt halten). Eddy plant in der eigenen Zeile.';
   }
 
   // from = Herkunftsfeld (null = aus der Liste, also kopieren). to = Zielfeld (null = entfernen)
@@ -1061,37 +1062,100 @@
   }
 
   let drag = null;
+  // Ziehen: Maus sofort, am Handy nach kurzem Gedrückthalten (sonst scrollt die Seite normal).
+  // Während des Ziehens scrollt die Seite mit, wenn man an den oberen/unteren Rand kommt.
+  const HOLD_MS = 260;
+  let autoRaf = 0;
+  function dropTarget(el, x, y){
+    const hit = document.elementFromPoint(x, y);
+    let target = hit && (hit.closest('.slot') || hit.closest('#pantry'));
+    if (target && target.id==='pantry' && !el.dataset.from) target = null;
+    return target;
+  }
+  function updateOver(){
+    if (!drag || !drag.started) return;
+    const target = dropTarget(drag.el, drag.px, drag.py);
+    if (target !== drag.over){ drag.over?.classList.remove('over'); target?.classList.add('over'); drag.over = target; }
+  }
+  function autoScroll(){
+    autoRaf = 0;
+    if (!drag || !drag.started) return;
+    const y = drag.py, H = innerHeight, zone = Math.max(60, Math.min(120, H*0.16)), max = 24;
+    const headH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--head-h')) || 0;
+    const top = Math.min(headH, H*0.4);
+    let v = 0;
+    if (y < top + zone) v = -Math.ceil(max * Math.min(1, (top + zone - y) / zone));
+    else if (y > H - zone) v = Math.ceil(max * Math.min(1, (y - (H - zone)) / zone));
+    // Kalender, der in sich scrollt (breiter Bildschirm)
+    const cal = document.querySelector('.cal');
+    if (cal && cal.scrollHeight > cal.clientHeight + 2){
+      const r = cal.getBoundingClientRect();
+      if (drag.px >= r.left && drag.px <= r.right && y >= r.top && y <= r.bottom){
+        if (y < r.top + 70) cal.scrollTop -= 12; else if (y > r.bottom - 70) cal.scrollTop += 12;
+        v = 0;
+      }
+    }
+    if (v) scrollBy(0, v);
+    updateOver();
+    autoRaf = setTimeout(autoScroll, 16);
+  }
+  function startDrag(e){
+    const el = drag.el;
+    drag.started = true;
+    const r = el.getBoundingClientRect();
+    drag.dx = Math.min(Math.max(e.clientX - r.left, 0), 30); drag.dy = Math.min(Math.max(e.clientY - r.top, 0), 30);
+    const g = el.cloneNode(true); g.classList.add('ghost'); g.classList.remove('selected','lifted');
+    g.querySelector('.remove')?.remove(); g.querySelector('.uses')?.remove();
+    g.style.width = Math.min(Math.max(r.width,170),230) + 'px';
+    document.body.appendChild(g); drag.ghost = g;
+    if (el.dataset.from) el.classList.add('dragging-src');
+    document.body.classList.add('is-dragging');
+    if (!autoRaf) autoRaf = setTimeout(autoScroll, 16);
+  }
+  // Solange am Handy gezogen wird, darf die Seite nicht selbst scrollen
+  document.addEventListener('touchmove', e=>{ if (drag && (drag.armed || drag.started)) e.preventDefault(); }, {passive:false});
+  document.addEventListener('contextmenu', e=>{ if (e.target.closest && e.target.closest('.dish')) e.preventDefault(); });
+
   function attachDrag(el){
     el.addEventListener('pointerdown', e=>{
       if (e.button !== 0) return;
-      drag = { el, x:e.clientX, y:e.clientY, started:false, ghost:null, over:null };
-      el.setPointerCapture(e.pointerId);
+      const touch = e.pointerType === 'touch';
+      drag = { el, x:e.clientX, y:e.clientY, px:e.clientX, py:e.clientY, started:false, ghost:null, over:null,
+               touch, armed:!touch, pid:e.pointerId, timer:0 };
+      if (touch){
+        drag.timer = setTimeout(()=>{
+          if (!drag || drag.el !== el) return;
+          drag.armed = true; el.classList.add('lifted');
+          try { el.setPointerCapture(drag.pid); } catch(err){}
+          try { navigator.vibrate && navigator.vibrate(12); } catch(err){}
+        }, HOLD_MS);
+      } else {
+        try { el.setPointerCapture(e.pointerId); } catch(err){}
+      }
     });
     el.addEventListener('pointermove', e=>{
       if (!drag || drag.el !== el) return;
+      drag.px = e.clientX; drag.py = e.clientY;
+      const moved = Math.hypot(e.clientX-drag.x, e.clientY-drag.y);
+      if (!drag.armed){
+        // Finger bewegt sich vor dem Gedrückthalten: das ist Scrollen, kein Ziehen
+        if (moved > 8){ clearTimeout(drag.timer); drag = null; }
+        return;
+      }
       if (!drag.started){
-        if (Math.hypot(e.clientX-drag.x, e.clientY-drag.y) < 6) return;
-        drag.started = true;
-        const r = el.getBoundingClientRect();
-        drag.dx = Math.min(e.clientX - r.left, 30); drag.dy = Math.min(e.clientY - r.top, 30);
-        const g = el.cloneNode(true); g.classList.add('ghost'); g.classList.remove('selected');
-        g.querySelector('.remove')?.remove(); g.querySelector('.uses')?.remove();
-        g.style.width = Math.min(Math.max(r.width,170),230) + 'px';
-        document.body.appendChild(g); drag.ghost = g;
-        if (el.dataset.from) el.classList.add('dragging-src');
-        document.body.classList.add('is-dragging');
+        if (moved < 6 && !drag.touch) return;
+        startDrag(e);
       }
       drag.ghost.style.transform = `translate(${e.clientX-drag.dx}px, ${e.clientY-drag.dy}px)`;
-      const hit = document.elementFromPoint(e.clientX, e.clientY);
-      let target = hit && (hit.closest('.slot') || hit.closest('#pantry'));
-      if (target && target.id==='pantry' && !el.dataset.from) target = null;
-      if (target !== drag.over){ drag.over?.classList.remove('over'); target?.classList.add('over'); drag.over = target; }
+      updateOver();
     });
     const end = cancelled=>{
       if (!drag || drag.el !== el) return;
       const d = drag; drag = null;
+      clearTimeout(d.timer);
+      if (autoRaf){ clearTimeout(autoRaf); autoRaf = 0; }
       document.body.classList.remove('is-dragging');
-      d.ghost?.remove(); d.over?.classList.remove('over'); el.classList.remove('dragging-src');
+      d.ghost?.remove(); d.over?.classList.remove('over'); el.classList.remove('dragging-src','lifted');
       if (!d.started){ if (!cancelled) tap(el); return; }
       if (cancelled || !d.over) return;
       const from = el.dataset.from || null;
