@@ -330,6 +330,48 @@
 
   .hint{margin-top:18px;font-family:var(--f-mono);font-size:.74rem;color:var(--ink-soft);display:flex;flex-wrap:wrap;gap:6px 22px}
 
+  /* ---------- Immer im Einkauf (Standardprodukte) ---------- */
+  .staples-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:22px;padding-top:22px;border-top:1px solid var(--line)}
+  .staples-head .sub-head{margin:0!important}
+  .staple-note{margin:-10px 0 0;font:400 12px/1.4 var(--f-body);color:var(--ink-soft)}
+  .staple-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+  .staple{position:relative;background:var(--surface);border:1px solid var(--card-line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .12s,box-shadow .12s}
+  .staple:hover{transform:translateY(-2px);box-shadow:0 10px 22px -16px rgba(0,0,0,.35)}
+  .staple:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .st-img{height:130px;display:grid;place-items:center;background:#fff;border-bottom:1px solid var(--card-line);padding:10px}
+  .st-img img{max-width:100%;max-height:100%;object-fit:contain;display:block;-webkit-user-drag:none}
+  .st-ph{display:flex;flex-direction:column;align-items:center;gap:6px;font:500 11px/1.3 var(--f-body);color:#8a8a8a;text-align:center}
+  .st-ph .ico{width:18px;height:18px}
+  .st-txt{padding:9px 11px 11px;display:flex;flex-direction:column;gap:4px;min-width:0}
+  .st-txt b{font:600 13px/1.3 var(--f-body);color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .st-txt .st-size{font:400 12px/1.3 var(--f-body);color:var(--ink-soft)}
+  .st-rh{align-self:flex-start;font:500 11px/1.35 var(--f-body);color:var(--tag-ink);background:var(--tag);padding:2px 7px;border-radius:4px}
+  .st-switch{position:absolute;top:8px;right:8px;width:36px;height:20px;border-radius:10px;border:none;padding:0;cursor:pointer;background:#c9c9c9;transition:background .15s}
+  .st-switch::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:left .15s}
+  .st-switch[aria-checked="true"]{background:var(--ink)}
+  .st-switch[aria-checked="true"]::after{left:18px}
+  .staple.off .st-img img{opacity:.35;filter:grayscale(1)}
+  .staple.off .st-txt b{color:var(--ink-faint)}
+  .staple-chips{margin-top:2px}
+  .staple-chips button{border-radius:100px}
+  #stModal{z-index:75;width:min(640px,calc(100% - 24px))} #stBg{z-index:74}
+  .st-edit{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;align-items:start}
+  @media (max-width:560px){ .st-edit{grid-template-columns:1fr} }
+  .st-drop{height:200px;border:1.5px dashed var(--ink-faint);border-radius:10px;background:#fff;display:grid;place-items:center;padding:10px;cursor:pointer;text-align:center}
+  .st-drop:focus{outline:2px solid var(--ink);outline-offset:2px}
+  .st-drop.over{border-color:var(--ink);background:var(--bg-deep)}
+  .st-drop img{max-width:100%;max-height:100%;object-fit:contain}
+  .st-drop span{font:400 12px/1.4 var(--f-body);color:#6a6a6a}
+  .st-drop span b{display:block;font:600 14px var(--f-body);color:#303030;margin-bottom:4px}
+  .st-pic-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .st-pic-btns .reset{border-radius:8px;font:500 12px var(--f-body);padding:6px 10px}
+  .st-file{position:relative;color:var(--ink-soft);background:none;border:1px solid var(--line);cursor:pointer;display:inline-flex;align-items:center}
+  .st-file:hover{color:var(--ink);border-color:var(--ink-soft)}
+  .st-file input{position:absolute;width:1px;height:1px;opacity:0}
+  .st-search{align-self:flex-start;font:500 12px var(--f-body);color:var(--rewe-text);text-decoration:none}
+  #stDel{color:var(--brick);border-color:var(--brick)}
+  @media (max-width:700px){ .staple-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px} .st-img{height:110px} }
+
   /* Ablage-Kalender, der beim Ziehen unten erscheint, wenn der echte Kalender nicht zu sehen ist */
   .drop-dock{position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:55;max-width:560px;margin:0 auto;
     background:var(--surface);border:1px solid var(--line-2);border-radius:12px;padding:10px 10px 8px;
@@ -650,6 +692,50 @@
     </div>
   </section>
 
+  <div class="sheet-backdrop" id="stBg" hidden></div>
+  <section class="modal" id="stModal" hidden aria-label="Produkt für „Immer im Einkauf“">
+    <div class="sheet-head">
+      <div><p class="eyebrow">Immer im Einkauf</p><h2 id="stTitle">Produkt</h2></div>
+      <button class="close" id="stClose" type="button" aria-label="Schließen">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="st-edit">
+        <div class="st-pic">
+          <div class="st-drop" id="stDrop" tabindex="0" aria-label="Produktbild: hier einfügen mit Strg+V">
+            <img id="stImg" alt="" draggable="false" hidden>
+            <span id="stDropTxt"><b>Bild einfügen</b>Bei REWE: Rechtsklick aufs Produktbild → „Bild kopieren“, dann hier Strg+V</span>
+          </div>
+          <div class="st-pic-btns">
+            <button class="reset" id="stPaste" type="button">Aus Zwischenablage</button>
+            <label class="reset st-file" for="stFile">Bild wählen<input type="file" id="stFile" accept="image/*"></label>
+            <button class="reset" id="stImgDel" type="button" hidden>Bild entfernen</button>
+          </div>
+        </div>
+        <div class="fields">
+          <label class="fld">Name<input id="stName" type="text" maxlength="60" placeholder="z. B. Butter" required></label>
+          <div class="fld-row">
+            <label class="fld">Packung<input id="stSize" type="text" maxlength="30" placeholder="z. B. 400 g"></label>
+            <label class="fld">Anzahl<input id="stCount" type="number" min="1" max="20" step="1" value="1"></label>
+          </div>
+          <div class="fld-row">
+            <label class="fld">Wie oft<select id="stRhythm">
+              <option value="1">jede Woche</option><option value="2">alle 2 Wochen</option>
+              <option value="3">alle 3 Wochen</option><option value="4">alle 4 Wochen</option></select></label>
+            <label class="fld">Preis <small>beim Merken</small><input id="stPrice" type="text" maxlength="12" placeholder="z. B. 4,69 €"></label>
+          </div>
+          <label class="fld">REWE-Produkt <small>Adresse der Produktseite</small><input id="stUrl" type="url" inputmode="url" placeholder="https://shop.rewe.de/p/…"></label>
+          <a class="st-search" id="stSearch" href="#" target="kochbox-rewe">Bei REWE suchen ↗</a>
+        </div>
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <button class="reset" id="stDel" type="button" hidden>Löschen</button>
+      <span class="copy-msg" id="stMsg" role="status"></span>
+      <button class="reset" id="stCancel" type="button">Abbrechen</button>
+      <button class="order" id="stSave" type="button">Speichern</button>
+    </div>
+  </section>
+
   <div class="sheet-backdrop" id="shopBg" hidden></div>
   <section class="modal" id="shopModal" hidden aria-label="Schritt für Schritt einkaufen">
     <div class="sheet-head">
@@ -731,6 +817,10 @@
         <p class="sec">Einkaufen</p>
         <ul id="buyList" class="buy-list"></ul>
       </section>
+      <section id="stapleBuySec">
+        <p class="sec">Immer im Einkauf</p>
+        <ul id="stapleBuy" class="buy-list"></ul>
+      </section>
       <section>
         <p class="sec">Zusätzlich kaufen</p>
         <form class="add" id="extraForm">
@@ -786,6 +876,14 @@
         <input id="addInput" type="text" placeholder="z. B. Müsli, Brote, Reste" maxlength="60" aria-label="Eigenes Gericht">
         <button type="submit">+</button>
       </form>
+
+      <div class="staples-head" id="staples">
+        <p class="sub-head">Immer im Einkauf <small id="countStaples"></small></p>
+        <button class="add-recipe" id="stapleAdd" type="button"><span class="ico i-plus-sm" aria-hidden="true"></span>Produkt</button>
+      </div>
+      <p class="staple-note">Kommt automatisch auf die REWE-Liste. Diese Woche nicht nötig? Schalter ausmachen.</p>
+      <div class="staple-grid" id="stapleGrid"></div>
+      <div class="chips staple-chips" id="stapleChips"></div>
     </section>
 
     <aside class="cal" aria-label="Wochenkalender">
@@ -1397,6 +1495,9 @@
       const b = document.createElement('button'); b.type='button'; b.className='set-ing'; b.textContent='Zutaten festlegen';
       b.addEventListener('click', ()=>openIng(c.id)); el.appendChild(b); cb.appendChild(el); });
     $('customSec').hidden = !cs.length;
+    const sb = $('stapleBuy'); sb.innerHTML = '';
+    activeStaples().forEach(s=>sb.appendChild(li('s:'+s.id, s.name, stQty(s), s.name, true, s.price ? 'zuletzt ' + s.price : '')));
+    $('stapleBuySec').hidden = !sb.children.length;
     renderExtras();
     $('copyMsg').textContent = '';
     $('copyFallback').hidden = true;
@@ -1412,10 +1513,13 @@
         const rows = (ING[id] || d.ing || []).filter(i=>checked[i[0]]).map(([name,amt,unit])=>`- ${name}${amt?` (${qtyText({amt:amt*n, unit})})`:''}`);
         if (rows.length) lines.push('', `${d.title}${n>1?` (${n}×)`:''}:`, ...rows);
       });
+      const st = activeStaples().filter(s=>checked['s:'+s.id] !== false).map(s=>`- ${s.name} (${stQty(s)})`);
+      if (st.length) lines.push('', 'Immer im Einkauf:', ...st);
       const ex = extras.filter(x=>checked['x:'+x.id] !== false).map(x=>`- ${x.n}${x.a?` (${qtyText({amt:x.a, unit:x.u})})`:''}`);
       if (ex.length) lines.push('', 'Zusätzlich:', ...ex);
     } else {
       collect().sort((a,b)=>a.name.localeCompare(b.name,'de')).forEach(i=>{ if (checked[i.name]) lines.push(`- ${i.name}${i.amt?` (${qtyText(i)})`:''}`); });
+      activeStaples().forEach(s=>{ if (checked['s:'+s.id] !== false) lines.push(`- ${s.name} (${stQty(s)})`); });
       extras.forEach(x=>{ if (checked['x:'+x.id] !== false) lines.push(`- ${x.n}${x.a?` (${qtyText({amt:x.a, unit:x.u})})`:''}`); });
     }
     custom.filter(c=>uses(c.id) && !recipeIng(c).length && checked['c:'+c.id]).forEach(c=>lines.push(`- Für: ${c.title}`));
@@ -1461,11 +1565,13 @@
   document.addEventListener('keydown', e=>{ if (e.key==='Escape' && !sheet.hidden && ingModal.hidden && document.getElementById('shopModal').hidden) closeSheet(); });
   function claudeOrder(){
     const rows = [];
-    const add = (name, amt, unit, q) => {
+    const add = (name, amt, unit, q, qtyStr) => {
       const p = productFor(name);
-      rows.push(`- ${name}${amt ? ' · ' + qtyText({amt, unit}) : ''}${p ? ` · Produkt: ${p.url}${p.label ? ' (' + p.label + ')' : ''}` : ` · Suche: ${q || name}`}`);
+      const qty = qtyStr || (amt ? qtyText({amt, unit}) : '');
+      rows.push(`- ${name}${qty ? ' · ' + qty : ''}${p ? ` · Produkt: ${p.url}${p.label ? ' (' + p.label + ')' : ''}` : ` · Suche: ${q || name}`}`);
     };
     collect().sort((a,b)=>a.name.localeCompare(b.name,'de')).forEach(i=>{ if (checked[i.name]) add(i.name, i.amt, i.unit, i.q); });
+    activeStaples().forEach(s=>{ if (checked['s:'+s.id] !== false) add(s.name, 0, '', s.name, stQty(s)); });
     extras.forEach(x=>{ if (checked['x:'+x.id] !== false) add(x.n, x.a, x.u, x.q || x.n); });
     return `Bitte lege diese Artikel in meinen REWE-Warenkorb auf shop.rewe.de. Bitte nichts bestellen und nichts bezahlen, das mache ich selbst.
 Nutze dafür meinen Chrome-Browser (Claude in Chrome), nicht den eingebauten Browser: Dort ist REWE schon offen und ich bin eingeloggt. Arbeite in einem neuen Tab.
@@ -1504,6 +1610,7 @@ ${rows.join('\n')}`;
   function shopItems(){
     const out = [];
     collect().sort((a,b)=>a.name.localeCompare(b.name,'de')).forEach(i=>{ if (checked[i.name]) out.push({name:i.name, amt:i.amt, unit:i.unit, q:i.q}); });
+    activeStaples().forEach(s=>{ if (checked['s:'+s.id] !== false) out.push({name:s.name, amt:0, unit:'', q:s.name, qtyStr:stQty(s)}); });
     extras.forEach(x=>{ if (checked['x:'+x.id] !== false) out.push({name:x.n, amt:x.a, unit:x.u, q:x.q || x.n}); });
     return out;
   }
@@ -1544,7 +1651,7 @@ ${rows.join('\n')}`;
     const it = s.items[s.i], prod = productFor(it.name);
     gid('shopCount').textContent = `Zutat ${s.i+1} von ${n}`;
     gid('shopName').textContent = it.name;
-    gid('shopQty').textContent = it.amt ? 'Menge laut Rezept: ' + qtyText(it) : 'Menge nach Bedarf';
+    gid('shopQty').textContent = it.qtyStr ? 'Menge: ' + it.qtyStr : it.amt ? 'Menge laut Rezept: ' + qtyText(it) : 'Menge nach Bedarf';
     if (prod && !s.change){
       body.innerHTML = `<div class="shop-prod"><small>Gemerktes Produkt</small><b>${esc(prod.label || 'Festes Produkt')}</b></div>
         <a class="order shop-go" href="${esc(prod.url)}" target="${REWE_TAB}">Produkt bei REWE öffnen ↗</a>
@@ -1614,6 +1721,7 @@ ${rows.join('\n')}`;
     try { assets = await window.claude.use('assets'); } catch(e){ assets = null; }
     try { sampleFn = await window.claude.use('sample'); } catch(e){ sampleFn = null; }
     if (db){
+      try { initStaplesDb(); } catch(e){ console.warn('Standardprodukte', e); }
       db.collection('pics').onSnapshot(snap=>{
         const m = {}; snap.docs.forEach(x=>{ const v = x.data(); if (v && typeof v.img==='string' && SAFE_IMG.test(v.img)) m[x.id] = v.img; });
         pics = m; put(PICSTORE, pics);
@@ -2191,6 +2299,219 @@ unit ist eins von: g, kg, ml, l, EL, TL, Stk, Bund, Topf, Dose, Pck, Becher, Gla
   document.getElementById('reset').addEventListener('click', ()=>{ plan = {}; sel = null; save(); render(); });
 
   render();
+
+  // ---------- Immer im Einkauf: Standardprodukte ----------
+  // staples: [{id, name, size, count, rhythm (Wochen), start (Wochennummer), price, img (data:…), createdAt}]
+  // stWeek (pro Woche): {on:[ids], off:[ids]} – Abweichungen vom Rhythmus nur für diese Woche
+  const SSTORE = 'kochbox-staples', SWSTORE = 'kochbox-stapleweek-' + days[0].key;
+  const weekNo = d => Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / (7*864e5));
+  const CUR_W = weekNo(monday);
+  let staples = load(SSTORE, []); if (!Array.isArray(staples)) staples = [];
+  let stWeek = load(SWSTORE, {on:[], off:[]}) || {on:[], off:[]};
+  const ST_SUGGEST = ['Milch','Butter','Toastbrot','Kaffee','Mehl','Eier','Bananen','Joghurt','Käse','Äpfel'];
+  const stRh = s => Math.min(8, Math.max(1, parseInt(s.rhythm, 10) || 1));
+  const stDue = s => { const r = stRh(s), st = Number.isFinite(+s.start) ? +s.start : CUR_W; return (((CUR_W - st) % r) + r) % r === 0; };
+  const stNext = s => { const r = stRh(s), st = Number.isFinite(+s.start) ? +s.start : CUR_W; return (r - ((((CUR_W - st) % r) + r) % r)) % r; };
+  const stOn = s => (stWeek.on || []).includes(s.id) || (stDue(s) && !(stWeek.off || []).includes(s.id));
+  const stQty = s => { const n = Math.max(1, parseInt(s.count, 10) || 1); return (n > 1 ? n + ' × ' : '') + (s.size || (n > 1 ? '' : '1 Pck')); };
+  const stImg = s => (typeof s.img === 'string' && SAFE_IMG.test(s.img)) ? s.img : '';
+  const activeStaples = () => staples.filter(stOn);
+  const stSorted = () => staples.slice().sort((a,b)=>(a.order ?? 1e9) - (b.order ?? 1e9) || String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
+
+  function persistStaple(s){
+    put(SSTORE, staples);
+    if (db){ const { id, ...data } = s; return db.collection('staples').doc(id).set(data).catch(e=>{ console.warn('Produkt nicht gespeichert', e); throw e; }); }
+    return Promise.resolve();
+  }
+  function removeStaple(id){
+    staples = staples.filter(s=>s.id!==id); put(SSTORE, staples);
+    if (db) db.collection('staples').doc(id).delete().catch(e=>console.warn(e));
+    renderStaples();
+  }
+  function saveWeek(){
+    put(SWSTORE, stWeek);
+    if (db) db.collection('stapleWeeks').doc(days[0].key).set({on: stWeek.on || [], off: stWeek.off || [], updatedAt: new Date().toISOString()}).catch(e=>console.warn(e));
+  }
+  function toggleStaple(s){
+    const on = stOn(s), due = stDue(s);
+    stWeek = {on: (stWeek.on || []).filter(x=>x!==s.id), off: (stWeek.off || []).filter(x=>x!==s.id)};
+    if (on && due) stWeek.off.push(s.id);
+    if (!on && !due) stWeek.on.push(s.id);
+    saveWeek(); renderStaples();
+    if (!sheet.hidden) renderSheet();
+  }
+
+  function renderStaples(){
+    const grid = document.getElementById('stapleGrid'); if (!grid) return;
+    grid.innerHTML = '';
+    const list = stSorted();
+    list.forEach(s=>{
+      const on = stOn(s), img = stImg(s), next = stNext(s);
+      const el = document.createElement('article'); el.className = 'staple' + (on ? '' : ' off'); el.tabIndex = 0; el.dataset.id = s.id;
+      el.setAttribute('aria-label', `${s.name}, ${on ? 'diese Woche dabei' : 'diese Woche nicht dabei'}`);
+      const rh = stRh(s) === 1 ? 'jede Woche' : `alle ${stRh(s)} Wochen`;
+      const when = !on && !stDue(s) && next ? ` · in ${next} ${next===1?'Woche':'Wochen'}` : (on && !stDue(s) ? ' · extra' : '');
+      el.innerHTML = `<div class="st-img">${img ? `<img src="${img}" alt="" draggable="false">` : '<span class="st-ph"><span class="ico i-plus-sm" aria-hidden="true"></span>Bild einfügen</span>'}</div>
+        <button type="button" class="st-switch" role="switch" aria-checked="${on}" aria-label="${esc(s.name)} diese Woche kaufen"></button>
+        <div class="st-txt"><b>${esc(s.name)}</b><span class="st-size">${esc(stQty(s))}${s.price ? ' · ' + esc(String(s.price)) : ''}</span><span class="st-rh">${rh}${when}</span></div>`;
+      el.querySelector('.st-switch').addEventListener('click', e=>{ e.stopPropagation(); toggleStaple(s); });
+      el.addEventListener('click', ()=>openStaple(s.id));
+      el.addEventListener('keydown', e=>{ if ((e.key==='Enter'||e.key===' ') && e.target===el){ e.preventDefault(); openStaple(s.id); } });
+      grid.appendChild(el);
+    });
+    const n = list.length, a = list.filter(stOn).length;
+    document.getElementById('countStaples').textContent = n ? `${a} von ${n} diese Woche` : 'noch leer';
+    const have = new Set(list.map(s=>s.name.toLowerCase()));
+    const chips = document.getElementById('stapleChips'); chips.innerHTML = '';
+    ST_SUGGEST.filter(x=>!have.has(x.toLowerCase())).slice(0, 8).forEach(x=>{
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = '+ ' + x;
+      b.addEventListener('click', ()=>openStaple(null, x)); chips.appendChild(b);
+    });
+  }
+
+  // Bild: als Quadrat (weißer Rand, ganzes Produkt sichtbar) verkleinern
+  function imgToSquare(blob, size){
+    return new Promise((res, rej)=>{
+      const url = URL.createObjectURL(blob), im = new Image();
+      im.onload = ()=>{
+        const S = size || 360, c = document.createElement('canvas'); c.width = S; c.height = S;
+        const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0,0,S,S);
+        const k = Math.min(S*0.92 / im.naturalWidth, S*0.92 / im.naturalHeight);
+        const w = im.naturalWidth*k, h = im.naturalHeight*k;
+        x.drawImage(im, (S-w)/2, (S-h)/2, w, h);
+        URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', .82));
+      };
+      im.onerror = ()=>{ URL.revokeObjectURL(url); rej(new Error('bild')); };
+      im.src = url;
+    });
+  }
+
+  // Dialog
+  const stModal = document.getElementById('stModal'), stBg = document.getElementById('stBg');
+  let stCur = null, stNewImg = null; // stNewImg: undefined = unverändert, '' = entfernen, data:… = neu
+  const stMsg = t => { document.getElementById('stMsg').textContent = t || ''; };
+  function stShowImg(src){
+    const im = document.getElementById('stImg'), txt = document.getElementById('stDropTxt');
+    im.hidden = !src; if (src) im.src = src; else im.removeAttribute('src');
+    txt.hidden = !!src;
+    document.getElementById('stImgDel').hidden = !src;
+  }
+  function stSearchLink(){ const n = document.getElementById('stName').value.trim(); document.getElementById('stSearch').href = reweUrl(n || 'Butter'); }
+  function openStaple(id, name){
+    const s = id ? staples.find(x=>x.id===id) : null;
+    stCur = s ? s.id : null; stNewImg = undefined;
+    const p = s ? productFor(s.name) : null;
+    document.getElementById('stTitle').textContent = s ? s.name : 'Neues Produkt';
+    document.getElementById('stName').value = s ? s.name : (name || '');
+    document.getElementById('stSize').value = s ? (s.size || '') : '';
+    document.getElementById('stCount').value = s ? (parseInt(s.count,10) || 1) : 1;
+    document.getElementById('stRhythm').value = String(s ? stRh(s) : 1);
+    document.getElementById('stPrice').value = s ? (s.price || '') : '';
+    document.getElementById('stUrl').value = p ? p.url : '';
+    document.getElementById('stDel').hidden = !s;
+    stShowImg(s ? stImg(s) : ''); stSearchLink(); stMsg('');
+    stModal.hidden = false; stBg.hidden = false;
+    (s ? document.getElementById('stDrop') : document.getElementById('stName')).focus();
+  }
+  function closeStaple(){ stModal.hidden = true; stBg.hidden = true; stCur = null; stNewImg = undefined; }
+  async function useImageBlob(blob){
+    if (!blob || !/^image\//.test(blob.type || 'image/')) { stMsg('Das ist kein Bild.'); return; }
+    stMsg('Bild wird vorbereitet …');
+    try { stNewImg = await imgToSquare(blob, 360); stShowImg(stNewImg); stMsg(''); }
+    catch(e){ stMsg('Das Bild konnte nicht gelesen werden.'); }
+  }
+  async function saveStaple(){
+    const name = document.getElementById('stName').value.trim();
+    if (!name){ stMsg('Bitte einen Namen eintragen.'); document.getElementById('stName').focus(); return; }
+    const url = document.getElementById('stUrl').value.trim().split('#')[0];
+    if (url && !okUrl(url)){ stMsg('Die Adresse muss von shop.rewe.de sein.'); document.getElementById('stUrl').focus(); return; }
+    const old = stCur ? staples.find(x=>x.id===stCur) : null;
+    const s = old ? Object.assign({}, old) : {id: 'st-' + Date.now().toString(36) + Math.random().toString(36).slice(2,5), start: CUR_W, createdAt: new Date().toISOString(), order: staples.length};
+    const oldName = old ? old.name : '';
+    s.name = name.slice(0,60);
+    s.size = document.getElementById('stSize').value.trim().slice(0,30);
+    s.count = Math.min(20, Math.max(1, parseInt(document.getElementById('stCount').value, 10) || 1));
+    const r = parseInt(document.getElementById('stRhythm').value, 10) || 1;
+    if (!old || stRh(old) !== r) s.start = CUR_W; // neuer Rhythmus zählt ab dieser Woche
+    s.rhythm = r;
+    s.price = document.getElementById('stPrice').value.trim().slice(0,12);
+    if (stNewImg !== undefined) s.img = stNewImg; else if (old) s.img = old.img || '';
+    s.updatedAt = new Date().toISOString();
+    if (old) staples = staples.map(x=>x.id===s.id ? s : x); else staples.push(s);
+    // REWE-Produkt über die gemeinsame Produkt-Liste merken (wie bei den Zutaten)
+    if (url) saveProduct(s.name, url, productFor(s.name)?.url === url ? productFor(s.name).label : '');
+    else if (productFor(s.name)) saveProduct(s.name, '');
+    if (oldName && oldName !== s.name && productFor(oldName) && !url) { const op = productFor(oldName); saveProduct(s.name, op.url, op.label); }
+    stMsg('Speichert …');
+    try { await persistStaple(s); }
+    catch(e){ stMsg(e && e.code==='permission_denied' ? 'Du darfst hier nichts speichern.' : 'Speichern hat nicht geklappt.'); return; }
+    closeStaple(); renderStaples(); if (!sheet.hidden) renderSheet();
+  }
+
+  document.getElementById('stapleAdd').addEventListener('click', ()=>openStaple(null));
+  document.getElementById('stClose').addEventListener('click', closeStaple);
+  document.getElementById('stCancel').addEventListener('click', closeStaple);
+  stBg.addEventListener('click', closeStaple);
+  document.getElementById('stSave').addEventListener('click', saveStaple);
+  document.getElementById('stName').addEventListener('input', stSearchLink);
+  document.getElementById('stDel').addEventListener('click', e=>{
+    const b = e.currentTarget;
+    if (!b.classList.contains('confirm')){ b.classList.add('confirm'); b.textContent = 'Wirklich löschen?'; setTimeout(()=>{ b.classList.remove('confirm'); b.textContent = 'Löschen'; }, 3500); return; }
+    const id = stCur; closeStaple(); if (id) removeStaple(id);
+    b.classList.remove('confirm'); b.textContent = 'Löschen';
+  });
+  document.getElementById('stImgDel').addEventListener('click', ()=>{ stNewImg = ''; stShowImg(''); });
+  document.getElementById('stFile').addEventListener('change', e=>{ const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) useImageBlob(f); });
+  document.getElementById('stDrop').addEventListener('click', ()=>document.getElementById('stDrop').focus());
+  document.getElementById('stPaste').addEventListener('click', async ()=>{
+    try {
+      const items = await navigator.clipboard.read();
+      for (const it of items){ const t = it.types.find(x=>/^image\//.test(x)); if (t){ useImageBlob(await it.getType(t)); return; } }
+      stMsg('In der Zwischenablage ist kein Bild. Bei REWE: Rechtsklick aufs Bild → „Bild kopieren“.');
+    } catch(e){ stMsg('Der Browser erlaubt das hier nicht. Klick ins Bildfeld und drück Strg+V.'); }
+  });
+  // Einfügen mit Strg+V, solange der Dialog offen ist
+  document.addEventListener('paste', e=>{
+    if (stModal.hidden) return;
+    const items = [...((e.clipboardData && e.clipboardData.items) || [])];
+    const img = items.find(i=>i.kind==='file' && /^image\//.test(i.type));
+    if (img){ e.preventDefault(); useImageBlob(img.getAsFile()); return; }
+    const t = e.target;
+    if (t && (t.tagName==='INPUT' || t.tagName==='TEXTAREA')) return; // Text normal einfügen
+    const html = e.clipboardData && e.clipboardData.getData('text/html');
+    if (html && /<img/i.test(html)) stMsg('Nur die Bildadresse kam an. Bitte bei REWE „Bild kopieren“ wählen (nicht „Bildadresse kopieren“).');
+  });
+  // Bilddatei auf das Feld ziehen
+  const stDrop = document.getElementById('stDrop');
+  ['dragenter','dragover'].forEach(t=>stDrop.addEventListener(t, e=>{ e.preventDefault(); stDrop.classList.add('over'); }));
+  ['dragleave','drop'].forEach(t=>stDrop.addEventListener(t, ()=>stDrop.classList.remove('over')));
+  stDrop.addEventListener('drop', e=>{
+    e.preventDefault();
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) useImageBlob(f); else stMsg('Aus einem anderen Tab kommt nur die Adresse an. Bitte „Bild kopieren“ und hier Strg+V.');
+  });
+  document.addEventListener('keydown', e=>{ if (e.key==='Escape' && !stModal.hidden){ e.stopPropagation(); closeStaple(); } }, true);
+
+  function initStaplesDb(){
+    let firstSt = true;
+    db.collection('staples').onSnapshot(snap=>{
+      const docs = snap.docs.map(x=>Object.assign({id:x.id}, x.data()));
+      if (firstSt){
+        firstSt = false;
+        const missing = staples.filter(s=>!docs.some(d=>d.id===s.id)); // lokal angelegte einmal übernehmen
+        if (missing.length){ missing.forEach(s=>persistStaple(s).catch(()=>{})); return; }
+      }
+      staples = docs; put(SSTORE, staples);
+      renderStaples(); if (!sheet.hidden) renderSheet();
+    }, e=>console.warn('Standardprodukte konnten nicht geladen werden', e));
+    db.collection('stapleWeeks').doc(days[0].key).onSnapshot(snap=>{
+      if (!snap.exists) return;
+      const v = snap.data() || {};
+      stWeek = {on: Array.isArray(v.on) ? v.on : [], off: Array.isArray(v.off) ? v.off : []};
+      put(SWSTORE, stWeek); renderStaples(); if (!sheet.hidden) renderSheet();
+    }, e=>console.warn('Wochenauswahl konnte nicht geladen werden', e));
+  }
+  renderStaples();
 
   // Titel + Statuskarte: beim Scrollen kompakt oben stehen lassen
   (function(){
